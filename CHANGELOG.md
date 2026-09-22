@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.1.3 -- 2026-09-22
+
+- Fix backend crash on fresh installs: config.example.yaml is now bundled as a resource so the packaged app can bootstrap config.yaml (was FileNotFoundError before)
+
 ## 0.1.2 -- 2026-09-22
 
 - Fix install.ps1 404 (auto-detect latest installer instead of a hardcoded filename); install.ps1 now only downloads backend source files instead of the whole repo; daily updates skip reinstalling Python deps unless requirements.txt changed

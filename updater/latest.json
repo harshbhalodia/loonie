@@ -1,11 +1,11 @@
 {
-    "version":  "0.1.2",
-    "notes":  "Fix install.ps1 404 (auto-detect latest installer instead of a hardcoded filename); install.ps1 now only downloads backend source files instead of the whole repo; daily updates skip reinstalling Python deps unless requirements.txt changed",
-    "pub_date":  "2026-09-22T02:30:20Z",
+    "version":  "0.1.3",
+    "notes":  "Fix backend crash on fresh installs: config.example.yaml is now bundled as a resource so the packaged app can bootstrap config.yaml (was FileNotFoundError before)",
+    "pub_date":  "2026-09-22T03:09:43Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkcrY0R4cHdSTGR0RUtEejVjMG8yeUg4TGFWQWo0QlAreXpWRXMyYm96ck92WHV3QklZUzZDbitBYjE0WWhMSU9Hdm1RMWtoTWNvSG9Gb3A3S1NUWFFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ0MjIwCWZpbGU6TG9vbmllXzAuMS4yX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuMgpWdCs4cWtsNmR6T1ZyVXIvOCtZYjJLaGNrK0NUMFh1VTdHWHBDYzNiS0M4UWl1QXFDdW5EYzMrdThXdUFhODI3VmFsSERwU0F0cFBZNlFEWGxIRGdBdz09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.2_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkMxSWN2c0JYaDBHTXJXWUlGRERUZU5DQTRrOXhBa3NMTEUxbzhTTnhMa1EwblhPSHlMQUp6YnFIMzVheEF4MkMzUm5TUzQvQS9SMGgvdmRVRWNTTWdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ2NTgzCWZpbGU6TG9vbmllXzAuMS4zX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuMwpodHNsd0xPZUVxbnBzeTFxL1FTV2R1bkNJb1dIdnJKL21qaVRiRWJQaCs1WUN5aklqVkc3Q1FPNFJobks3WkF5NUU0ZzQ2N1JjZ2RhQmdWRGdZMFBDUT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.3_x64-setup.exe"
                                          }
                   }
 }
