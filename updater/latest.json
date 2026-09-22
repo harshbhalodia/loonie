@@ -1,11 +1,11 @@
 {
-    "version":  "0.1.4",
-    "notes":  "Rebrand from LifeOS to Loonie across the app, and add a first-run onboarding flow (welcome, set your first goal, add your first account, quick-start checklist) for the Wealth module",
-    "pub_date":  "2026-09-22T03:26:35Z",
+    "version":  "0.1.5",
+    "notes":  "Update button is now a prominent blue \u0027Update\u0027 button (header pill + Settings) that downloads and installs the latest version directly, instead of just a message pointing elsewhere",
+    "pub_date":  "2026-09-22T03:40:01Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkN6dnJPYU5lR1Z3RFBTV08zQlRQbjdGajNwc0h3TFhnRC9EbDVGOGJvRGpENDhFelFsY1YxbVBRZVY5aDlCQzAyZWhRV0NtV1VNWWh5diswRmtiWEFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ3NTk1CWZpbGU6TG9vbmllXzAuMS40X3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuNAo5M2RISmNIeFBBQXRhZzV1TmExMDBUZWNGUExucXZsVjFJSVhyU0J0dWdTbmRLb3JZQVNoUEtIZnJ2QURYK0tXQTNxNDRLTmdMa0lsVTV2VW9rbWlCUT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.4_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkxua3k1cXpvaVEyZk5aR0ZMa0Z2YU8zWU1WU1piNTI5cFRrZDFaem1VTzZVcFVjNDROTnUvOGNWamdHNVRWR3Y0UFUrQmtjemQ3T0tIYitqOXV4endBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ4NDAxCWZpbGU6TG9vbmllXzAuMS41X3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuNQp6WXRGbmlnQTdhalBMMmxtQUZoQnBMWTk2eFZOenpoK255SlA0VFFGaHgvMVhKUE5mWW44M1JQalRuR1d4S3NSK3lNcVh3ZTJkc0xMVGZWUm9qMm5BQT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.5_x64-setup.exe"
                                          }
                   }
 }

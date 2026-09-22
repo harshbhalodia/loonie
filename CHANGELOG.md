@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.1.5 -- 2026-09-22
+
+- Update button is now a prominent blue 'Update' button (header pill + Settings) that downloads and installs the latest version directly, instead of just a message pointing elsewhere
+
 ## 0.1.4 -- 2026-09-22
 
 - Rebrand from LifeOS to Loonie across the app, and add a first-run onboarding flow (welcome, set your first goal, add your first account, quick-start checklist) for the Wealth module
