@@ -44,9 +44,19 @@ If you'd rather not run the one-liner:
    copy ..\config\config.example.yaml ..\config\config.yaml
    .venv\Scripts\python.exe -m alembic upgrade head
    ```
-5. Run the installer from [`installer/Loonie_0.1.0_x64-setup.exe`](installer/Loonie_0.1.0_x64-setup.exe)
+5. Run the installer from [`installer/Loonie_0.1.1_x64-setup.exe`](installer/Loonie_0.1.1_x64-setup.exe)
    (or the `.msi` in the same folder).
 6. Launch Loonie — it auto-starts the backend for you.
+
+## Staying up to date
+
+Loonie checks for new versions automatically (every 30 minutes, and once on launch). When one is
+available you'll see an **Update available** pill in the header — click it, then "Update &
+restart now", and Loonie downloads the update, restarts the backend, and relaunches itself on the
+new version. No need to re-run the installer or visit this page again.
+
+You can also check manually any time from **Settings → Version & updates**. See
+[CHANGELOG.md](CHANGELOG.md) for what's new in each release.
 
 ## Requirements
 
@@ -61,7 +71,8 @@ Loonie is a native desktop shell (Tauri) around a React frontend. On launch, it 
 starts your local FastAPI backend (or reuses one already running on port 8000) and shuts it down
 again when you close the app. Your data lives entirely in a local SQLite file under
 `%LOCALAPPDATA%\Loonie\backend\data\lifeos.db` — nothing is sent anywhere unless you explicitly
-enable an AI provider.
+enable an AI provider. The backend source ships inside the installer itself, so app updates keep
+the backend in sync automatically — nothing extra to download or copy.
 
 ## Jumpstart tutorials
 
