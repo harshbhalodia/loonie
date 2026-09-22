@@ -1,11 +1,11 @@
 {
-  "version": "0.1.1",
-  "notes": "Auto-update support: Loonie now checks for new versions and can update + restart itself in one click. The backend now also self-configures (auto migrations, random JWT secret) and stays in sync with the app version.",
-  "pub_date": "2026-09-22T02:11:49Z",
-  "platforms": {
-    "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTk1ncSt2WDhsakFhR0JwWDBtS282MVNhN21FclRNM0FlRVdMQ21mNkZwZUFDMjhFbHVmSkdFUkRreDBtQTZ5U3FYYkJTM3ljSjBpcGI2T1BMYVdQa3djPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQzMjE4CWZpbGU6TG9vbmllXzAuMS4xX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuMQpkT3UxU0RjalVNN1JTbU80clQxckFCT3pPVS9wYTNTVmtRR2tWQVpTZ0hqeFJnWW11Nml6RHMxUTh5MW5Ed201alh2ZzBZeHgvMUt4UDc2RDNuWDZEdz09Cg==",
-      "url": "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.1_x64-setup.exe"
-    }
-  }
+    "version":  "0.1.2",
+    "notes":  "Fix install.ps1 404 (auto-detect latest installer instead of a hardcoded filename); install.ps1 now only downloads backend source files instead of the whole repo; daily updates skip reinstalling Python deps unless requirements.txt changed",
+    "pub_date":  "2026-09-22T02:30:20Z",
+    "platforms":  {
+                      "windows-x86_64":  {
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkcrY0R4cHdSTGR0RUtEejVjMG8yeUg4TGFWQWo0QlAreXpWRXMyYm96ck92WHV3QklZUzZDbitBYjE0WWhMSU9Hdm1RMWtoTWNvSG9Gb3A3S1NUWFFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ0MjIwCWZpbGU6TG9vbmllXzAuMS4yX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuMgpWdCs4cWtsNmR6T1ZyVXIvOCtZYjJLaGNrK0NUMFh1VTdHWHBDYzNiS0M4UWl1QXFDdW5EYzMrdThXdUFhODI3VmFsSERwU0F0cFBZNlFEWGxIRGdBdz09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.2_x64-setup.exe"
+                                         }
+                  }
 }

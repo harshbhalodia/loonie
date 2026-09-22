@@ -6,19 +6,38 @@
     1. Install Python (via winget) if it's missing.
     2. Set up the Loonie backend (venv + dependencies) under %LOCALAPPDATA%\Loonie\backend.
     3. Create config/config.yaml from the example template (with a fresh random JWT secret).
-    4. Download and launch the Loonie desktop installer.
+    4. Download and launch the current Loonie desktop installer.
+
+  Only downloads the backend source files + the current installer - never the whole repo
+  (which also holds every past installer build) - so this stays fast even as releases pile up.
 
   Usage (from PowerShell):
     irm https://raw.githubusercontent.com/harshbhalodia/loonie/main/install.ps1 | iex
 #>
 $ErrorActionPreference = "Stop"
 
-$RepoRaw = "https://raw.githubusercontent.com/harshbhalodia/loonie/main"
-$RepoZip = "https://github.com/harshbhalodia/loonie/archive/refs/heads/main.zip"
+$Owner = "harshbhalodia"
+$Repo = "loonie"
+$RepoRaw = "https://raw.githubusercontent.com/$Owner/$Repo/main"
+$ApiBase = "https://api.github.com/repos/$Owner/$Repo/contents"
 $LoonieHome = Join-Path $env:LOCALAPPDATA "Loonie"
 $BackendHome = Join-Path $LoonieHome "backend"
 
 function Write-Step($msg) { Write-Host "`n== $msg ==" -ForegroundColor Cyan }
+
+# Recursively downloads a folder from the repo via the GitHub Contents API, so install only
+# pulls the handful of backend source files instead of the entire repo (installers included).
+function Get-GithubFolder($apiPath, $destDir) {
+    New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+    $entries = Invoke-RestMethod -Uri "$ApiBase/$apiPath" -Headers @{ "User-Agent" = "loonie-install" }
+    foreach ($entry in $entries) {
+        if ($entry.type -eq "dir") {
+            Get-GithubFolder "$apiPath/$($entry.name)" (Join-Path $destDir $entry.name)
+        } else {
+            Invoke-WebRequest -Uri $entry.download_url -OutFile (Join-Path $destDir $entry.name)
+        }
+    }
+}
 
 Write-Step "Checking for Python"
 $python = Get-Command python -ErrorAction SilentlyContinue
@@ -35,23 +54,13 @@ if (-not $python) {
 
 Write-Step "Downloading Loonie backend source"
 New-Item -ItemType Directory -Force -Path $LoonieHome | Out-Null
-$zipPath = Join-Path $env:TEMP "loonie-main.zip"
-Invoke-WebRequest -Uri $RepoZip -OutFile $zipPath
-$extractDir = Join-Path $env:TEMP "loonie-extract"
-if (Test-Path $extractDir) { Remove-Item $extractDir -Recurse -Force }
-Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
-$extractedBackend = Join-Path $extractDir "loonie-main\backend"
-$extractedConfigExample = Join-Path $extractDir "loonie-main\config\config.example.yaml"
-
 if (Test-Path $BackendHome) { Remove-Item $BackendHome -Recurse -Force }
-Copy-Item $extractedBackend $BackendHome -Recurse -Force
+Get-GithubFolder "backend" $BackendHome
 
 $configDir = Join-Path $LoonieHome "config"
 New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 $configExampleCopy = Join-Path $configDir "config.example.yaml"
-Copy-Item $extractedConfigExample $configExampleCopy -Force
-
-Remove-Item $zipPath, $extractDir -Recurse -Force
+Invoke-WebRequest -Uri "$RepoRaw/config/config.example.yaml" -OutFile $configExampleCopy
 
 Write-Step "Setting up Python virtual environment"
 python -m venv (Join-Path $BackendHome ".venv")
@@ -76,10 +85,16 @@ Push-Location $BackendHome
 Pop-Location
 
 Write-Step "Downloading the Loonie desktop app"
+# Reads updater/latest.json instead of a hardcoded filename, so this always grabs whichever
+# version is currently published - no need to edit this script for every new release.
+$latest = Invoke-RestMethod -Uri "$RepoRaw/updater/latest.json"
+$installerUrl = $latest.platforms.'windows-x86_64'.url
+Write-Host "Latest version: $($latest.version)" -ForegroundColor Yellow
 $installerPath = Join-Path $env:TEMP "Loonie-setup.exe"
-Invoke-WebRequest -Uri "$RepoRaw/installer/Loonie_0.1.0_x64-setup.exe" -OutFile $installerPath
+Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
 Write-Host "Launching installer..." -ForegroundColor Green
 Start-Process $installerPath -Wait
 
 Write-Host "`nAll done! Launch Loonie from the Start Menu." -ForegroundColor Green
 Write-Host "Log in with admin@example.com / change-me (see $configYaml)." -ForegroundColor Green
+
