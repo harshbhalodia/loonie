@@ -1,4 +1,4 @@
-"""AI provider abstraction. Entirely optional — every core LifeOS feature works without it.
+"""AI provider abstraction. Entirely optional — every core Loonie feature works without it.
 
 Supports two request "styles" so both a plain local endpoint and a standard
 OpenAI-compatible one (Ollama, LM Studio, OpenAI itself) can be configured

@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.1.4 -- 2026-09-22
+
+- Rebrand from LifeOS to Loonie across the app, and add a first-run onboarding flow (welcome, set your first goal, add your first account, quick-start checklist) for the Wealth module
+
 ## 0.1.3 -- 2026-09-22
 
 - Fix backend crash on fresh installs: config.example.yaml is now bundled as a resource so the packaged app can bootstrap config.yaml (was FileNotFoundError before)

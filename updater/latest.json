@@ -1,11 +1,11 @@
 {
-    "version":  "0.1.3",
-    "notes":  "Fix backend crash on fresh installs: config.example.yaml is now bundled as a resource so the packaged app can bootstrap config.yaml (was FileNotFoundError before)",
-    "pub_date":  "2026-09-22T03:09:43Z",
+    "version":  "0.1.4",
+    "notes":  "Rebrand from LifeOS to Loonie across the app, and add a first-run onboarding flow (welcome, set your first goal, add your first account, quick-start checklist) for the Wealth module",
+    "pub_date":  "2026-09-22T03:26:35Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkMxSWN2c0JYaDBHTXJXWUlGRERUZU5DQTRrOXhBa3NMTEUxbzhTTnhMa1EwblhPSHlMQUp6YnFIMzVheEF4MkMzUm5TUzQvQS9SMGgvdmRVRWNTTWdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ2NTgzCWZpbGU6TG9vbmllXzAuMS4zX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuMwpodHNsd0xPZUVxbnBzeTFxL1FTV2R1bkNJb1dIdnJKL21qaVRiRWJQaCs1WUN5aklqVkc3Q1FPNFJobks3WkF5NUU0ZzQ2N1JjZ2RhQmdWRGdZMFBDUT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.3_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkN6dnJPYU5lR1Z3RFBTV08zQlRQbjdGajNwc0h3TFhnRC9EbDVGOGJvRGpENDhFelFsY1YxbVBRZVY5aDlCQzAyZWhRV0NtV1VNWWh5diswRmtiWEFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ3NTk1CWZpbGU6TG9vbmllXzAuMS40X3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuNAo5M2RISmNIeFBBQXRhZzV1TmExMDBUZWNGUExucXZsVjFJSVhyU0J0dWdTbmRLb3JZQVNoUEtIZnJ2QURYK0tXQTNxNDRLTmdMa0lsVTV2VW9rbWlCUT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.4_x64-setup.exe"
                                          }
                   }
 }

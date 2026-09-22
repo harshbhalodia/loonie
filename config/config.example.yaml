@@ -1,8 +1,8 @@
-# LifeOS configuration — copy to config.yaml and edit.
+# Loonie configuration — copy to config.yaml and edit.
 # config.yaml is never overwritten by upgrades and is git-ignored.
 
 app:
-  name: LifeOS
+  name: Loonie
   host: 0.0.0.0
   port: 8000
   # Origins allowed to call the API (the Vite dev server, the packaged Tauri desktop app, and
@@ -43,7 +43,7 @@ ai:
   max_tokens: 65536
 
 # Jev (TypeSafe AI's System One model) powers the Decision Maker page. Optional — the rest of
-# LifeOS works without it. Get an API key from https://console.typesafe.ai/keys.
+# Loonie works without it. Get an API key from https://console.typesafe.ai/keys.
 jev:
   enabled: false
   api_key: ""
