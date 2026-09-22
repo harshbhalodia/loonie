@@ -1,3 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local data / secrets - never commit real config or the database
+config/config.yaml
+backend/data/
+*.db
+
 # Logs
 logs
 *.log

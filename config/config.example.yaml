@@ -1,0 +1,51 @@
+# LifeOS configuration — copy to config.yaml and edit.
+# config.yaml is never overwritten by upgrades and is git-ignored.
+
+app:
+  name: LifeOS
+  host: 0.0.0.0
+  port: 8000
+  # Origins allowed to call the API (the Vite dev server, the packaged Tauri desktop app, and
+  # any deployed frontend). Tauri v2 serves the bundled app from http://tauri.localhost on
+  # Windows (tauri://localhost on macOS/Linux).
+  cors_origins:
+    - http://localhost:5173
+    - http://tauri.localhost
+    - tauri://localhost
+
+database:
+  # Path is relative to the backend/ working directory.
+  path: ./data/lifeos.db
+
+auth:
+  jwt_secret: change-me-to-a-long-random-string
+  access_token_expire_minutes: 43200 # 30 days
+  # Bootstrap admin, only used the first time the app starts with zero users.
+  initial_admin_email: admin@example.com
+  initial_admin_password: change-me
+
+# AI is entirely optional — every core feature works without it.
+ai:
+  enabled: true
+  provider: local
+  endpoint: http://localhost:1234/api/v1/chat
+  model: qwen/qwen3.6-35b-a3b
+  # "simple" posts {model, system_prompt, input} and reads a single text field back.
+  # "openai" posts {model, messages:[...]} to an OpenAI-compatible /chat/completions endpoint.
+  style: simple
+  # Dot-path into the JSON response used to find the generated text (tried first).
+  response_field: output
+  temperature: 0.2
+  # Hard cap on generated tokens per request — protects against a confused/looping reasoning
+  # model generating forever (no external timeout can stop that once the model server itself is
+  # still emitting tokens). Reasoning models like Qwen3.6 can burn thousands of tokens on
+  # chain-of-thought before answering, so keep this generous or heavy prompts get cut off mid-think.
+  max_tokens: 65536
+
+# Jev (TypeSafe AI's System One model) powers the Decision Maker page. Optional — the rest of
+# LifeOS works without it. Get an API key from https://console.typesafe.ai/keys.
+jev:
+  enabled: false
+  api_key: ""
+  base_url: https://api.typesafe.ai/v1/systemone
+  model: jev-latest
