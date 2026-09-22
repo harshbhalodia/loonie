@@ -45,6 +45,12 @@ $extractedConfigExample = Join-Path $extractDir "loonie-main\config\config.examp
 
 if (Test-Path $BackendHome) { Remove-Item $BackendHome -Recurse -Force }
 Copy-Item $extractedBackend $BackendHome -Recurse -Force
+
+$configDir = Join-Path $LoonieHome "config"
+New-Item -ItemType Directory -Force -Path $configDir | Out-Null
+$configExampleCopy = Join-Path $configDir "config.example.yaml"
+Copy-Item $extractedConfigExample $configExampleCopy -Force
+
 Remove-Item $zipPath, $extractDir -Recurse -Force
 
 Write-Step "Setting up Python virtual environment"
@@ -54,11 +60,9 @@ $pythonExe = Join-Path $BackendHome ".venv\Scripts\python.exe"
 & $pythonExe -m pip install -r (Join-Path $BackendHome "requirements.txt") -q
 
 Write-Step "Creating configuration"
-$configDir = Join-Path $LoonieHome "config"
 $configYaml = Join-Path $configDir "config.yaml"
 if (-not (Test-Path $configYaml)) {
-    New-Item -ItemType Directory -Force -Path $configDir | Out-Null
-    Copy-Item $extractedConfigExample $configYaml
+    Copy-Item $configExampleCopy $configYaml
     # Each install gets its own random JWT secret instead of the shared example placeholder.
     $secret = -join ((1..64) | ForEach-Object { "{0:x}" -f (Get-Random -Maximum 16) })
     (Get-Content $configYaml) -replace "change-me-to-a-long-random-string", $secret | Set-Content $configYaml
