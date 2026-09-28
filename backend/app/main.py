@@ -16,6 +16,7 @@ from app.routers import (
     assets,
     assumptions,
     auth,
+    backup,
     budgets,
     categories,
     category_groups,
@@ -25,14 +26,17 @@ from app.routers import (
     goals,
     jobs,
     keyword_candidates,
+    marketplace,
     reminders,
     scenarios,
+    settings,
     statements,
     topics,
     watchlist,
 )
 from app.security import hash_password
 from app.services.defaults import seed_default_category_groups
+from app.services.google_drive import apply_pending_restore_if_any
 from app.services.job_queue import start_worker
 
 
@@ -65,6 +69,7 @@ def _bootstrap_admin() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    apply_pending_restore_if_any()
     _run_migrations()
     _bootstrap_admin()
     start_worker()
@@ -104,7 +109,9 @@ app.include_router(reminders.router)
 app.include_router(jobs.router)
 app.include_router(decisions.router)
 app.include_router(decisions.jev_router)
-
+app.include_router(backup.router)
+app.include_router(marketplace.router)
+app.include_router(settings.router)
 
 @app.get("/health")
 def health():

@@ -51,6 +51,75 @@ class UserSettingsIn(BaseModel):
     fiscal_year_start_month: int = Field(ge=1, le=12)
 
 
+class SetupStatusOut(BaseModel):
+    needs_setup: bool
+
+
+class SetupRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=256)
+
+
+# ---------------- in-app integration settings ----------------
+
+AiStyle = Literal["simple", "openai"]
+
+
+class AiSettingsIn(BaseModel):
+    enabled: bool
+    endpoint: str = Field(pattern=r"^https?://\S+$", max_length=500)
+    model: str = Field(min_length=1, max_length=200)
+    style: AiStyle = "simple"
+    temperature: float = Field(default=0.2, ge=0, le=2)
+    max_tokens: int = Field(default=65536, ge=256, le=262144)
+
+
+class AiSettingsOut(BaseModel):
+    enabled: bool
+    endpoint: str | None
+    model: str | None
+    style: str | None
+    temperature: float | None
+    max_tokens: int | None
+
+
+class AiTestOut(BaseModel):
+    ok: bool
+    message: str
+
+
+class JevSettingsIn(BaseModel):
+    enabled: bool
+    # None/empty keeps the stored key; never echoed back to the client.
+    api_key: str | None = Field(default=None, max_length=500)
+    model: str = Field(default="jev-latest", max_length=100)
+
+
+class JevSettingsOut(BaseModel):
+    enabled: bool
+    api_key_set: bool
+    model: str | None
+
+
+class GoogleDriveSettingsIn(BaseModel):
+    enabled: bool
+    client_id: str = Field(default="", max_length=500)
+    # None/empty keeps the stored secret; never echoed back to the client.
+    client_secret: str | None = Field(default=None, max_length=500)
+
+
+class GoogleDriveSettingsOut(BaseModel):
+    enabled: bool
+    client_id: str
+    client_secret_set: bool
+
+
+class IntegrationSettingsOut(BaseModel):
+    ai: AiSettingsOut
+    jev: JevSettingsOut
+    google_drive: GoogleDriveSettingsOut
+
+
 # ---------------- accounts ----------------
 
 
@@ -697,6 +766,132 @@ class StatementApplyIn(BaseModel):
     statement_balance: float | None = None
     minimum_due: float | None = None
     due_date: date | None = None
+
+
+# ---------------- marketplace (blueprint browse/install/run + studio drafts) ----------------
+
+BlueprintTier = Literal["free", "paid"]
+
+
+class BlueprintScenarioOut(BaseModel):
+    id: str
+    description: str
+
+
+class BlueprintCatalogEntryOut(BaseModel):
+    id: str
+    name: str
+    publisher: str
+    version: str
+    tier: BlueprintTier
+    price_usd: float | None
+    category: str
+    summary: str
+    inputs: list[str]
+    tags: list[str]
+    scenarios: list[BlueprintScenarioOut]
+
+
+class InstalledBlueprintOut(ORMModel):
+    id: str
+    blueprint_id: str
+    version: str
+    tier: BlueprintTier
+    installed_at: datetime
+
+
+class InstallBlueprintIn(BaseModel):
+    blueprint_id: str
+    license_token: str | None = None
+
+
+class BlueprintRunResult(BaseModel):
+    blueprint_id: str
+    status: Literal["ok", "error"]
+    result: str | None = None
+    error: str | None = None
+
+
+class DemoLicenseOut(BaseModel):
+    blueprint_id: str
+    license_token: str
+
+
+class StudioScenarioIn(BaseModel):
+    id: str
+    description: str
+
+
+class StudioDraftIn(BaseModel):
+    id: str | None = None
+    name: str
+    publisher: str
+    tier: BlueprintTier = "free"
+    price_usd: float | None = None
+    category: str = "stress_test"
+    summary: str = ""
+    inputs: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    scenarios: list[StudioScenarioIn] = Field(min_length=1)
+
+
+class BlueprintRunOut(ORMModel):
+    id: str
+    blueprint_id: str
+    blueprint_version: str
+    tier: BlueprintTier
+    status: Literal["ok", "error"]
+    facts_json: str
+    result: str | None
+    error: str | None
+    shared_scopes_json: str | None
+    user_rating: Literal["helpful", "not_helpful"] | None
+    user_note: str | None
+    shared_with_publisher_at: datetime | None
+    created_at: datetime
+
+
+class BlueprintRunFeedbackIn(BaseModel):
+    rating: Literal["helpful", "not_helpful"] | None = None
+    note: str | None = None
+
+
+class BlueprintRunExportOut(BaseModel):
+    blueprint_id: str
+    blueprint_version: str
+    tier: BlueprintTier
+    facts: dict
+    result: str
+    user_rating: str | None
+    user_note: str | None
+
+
+class DataScopeOut(BaseModel):
+    id: str
+    label: str
+    description: str
+
+
+class BlueprintScopesOut(BaseModel):
+    """What a blueprint is requesting (with human-readable labels) plus what's currently
+    granted — the data-sharing consent screen renders directly off this."""
+
+    blueprint_id: str
+    blueprint_version: str
+    requested: list[DataScopeOut]
+    granted: list[str]
+
+
+class GrantScopesIn(BaseModel):
+    scopes: list[str]
+
+
+class DataGrantOut(BaseModel):
+    blueprint_id: str
+    blueprint_version: str
+    granted_scopes: list[str]
+    granted_at: datetime
+    updated_at: datetime
 
 
 class StatementApplyResult(BaseModel):

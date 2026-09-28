@@ -2,106 +2,84 @@
 
 > Plan with purpose. Decide with clarity. Pivot with confidence.
 
-Loonie is a private, local-first "Life OS" desktop app — track wealth, budgets, goals and net
-worth, import bank statements, and get AI-assisted insights from your own local LLM (or the Jev
-API). Everything runs on your own machine: a self-hosted FastAPI backend + SQLite database, no
-cloud account required.
+Loonie is a private, local-first "Life OS" desktop app for Windows — track accounts, budgets,
+goals and net worth, import bank statements, stress-test your finances with marketplace
+blueprints, and get advice from AI that runs on your own computer. Your data never leaves your
+machine unless you choose to connect an optional service.
 
-## Quick install (recommended)
+**Website:** [loonie.ai](https://loonie.ai)
 
-Open **PowerShell** and run:
+## Install
+
+**Option 1 — Windows installer (recommended)**
+
+1. Install [Python 3.11+](https://python.org/downloads/) if you don't have it (tick **Add to PATH**).
+2. Download the latest installer from [`installer/`](installer/) (or from [loonie.ai](https://loonie.ai#download)) and run it.
+3. Launch **Loonie** from the Start menu.
+
+**Option 2 — one line in PowerShell** (installs Python for you if it's missing):
 
 ```powershell
 irm https://raw.githubusercontent.com/harshbhalodia/loonie/main/install.ps1 | iex
 ```
 
-This single command:
-- Installs Python automatically if it's missing (via `winget`, no manual download needed)
-- Sets up the Loonie backend under `%LOCALAPPDATA%\Loonie`
-- Creates your local config with a unique, randomly generated security key
-- Downloads and launches the Loonie desktop installer
+## First launch
 
-When it finishes, launch **Loonie** from the Start Menu and log in with:
+1. Loonie starts its private local engine. The very first launch can take a minute while it sets
+   itself up — you'll see a "Starting…" screen.
+2. **Create your account** — an email and password that live only on this computer.
+3. A short guided tour helps you add a goal and an account, and optionally connect an AI model.
 
-- Email: `admin@example.com`
-- Password: `change-me`
+No config files to edit — everything is set up inside the app.
 
-Change this password after your first login (edit `%LOCALAPPDATA%\Loonie\config\config.yaml`,
-then fully restart Loonie for it to take effect — this only affects newly-created accounts, not
-existing ones, since the password is only set once on first startup).
+## Connecting AI (optional)
 
-## Manual install
+Every calculation in Loonie works without AI. To unlock advisor agents, marketplace stress tests
+and PDF statement import, go to **Settings → AI model**, pick **LM Studio** or **Ollama** (or any
+OpenAI-compatible server), enter the model name, and click **Save & test connection**.
 
-If you'd rather not run the one-liner:
+- **LM Studio:** Developer tab → Start server, then copy the model name.
+- **Ollama:** `ollama pull llama3.1` — it serves automatically.
 
-1. Install [Python 3.11+](https://python.org/downloads/) if you don't already have it.
-2. Download this repo (Code → Download ZIP, or `git clone`).
-3. Copy `backend/` to `%LOCALAPPDATA%\Loonie\backend` and `config/` to `%LOCALAPPDATA%\Loonie\config`.
-4. Open a terminal in `%LOCALAPPDATA%\Loonie\backend` and run:
-   ```powershell
-   python -m venv .venv
-   .venv\Scripts\python.exe -m pip install -r requirements.txt
-   copy ..\config\config.example.yaml ..\config\config.yaml
-   .venv\Scripts\python.exe -m alembic upgrade head
-   ```
-5. Run the installer from [`installer/Loonie_0.1.1_x64-setup.exe`](installer/Loonie_0.1.1_x64-setup.exe)
-   (or the `.msi` in the same folder).
-6. Launch Loonie — it auto-starts the backend for you.
+## What's inside
+
+- **Wealth:** accounts & net worth, monthly/yearly budgets with history, goals with on-track
+  verdicts, CSV/PDF statement import with keyword rules, reminders, credit-card statements,
+  scenario sandbox, watchlist & research topics.
+- **Insights:** budget, risk, diversification, goal, investment and research advisor agents —
+  they explain numbers Loonie already computed, never invent them.
+- **Blueprint Marketplace:** free and premium stress-test blueprints (rate shock, job loss,
+  market correction, inflation…). A consent screen lets you choose exactly which data categories
+  each blueprint may use; every run is kept with the blueprint version so you can compare.
+  **Blueprint Studio** lets you draft and test your own, no code required.
+- **Decision Maker:** describe a decision and options; Jev picks the best fit for your profile.
+  Add a free API key under **Settings → Decision Maker**.
+- **Google Drive backup:** optional off-site backup & restore, set up under **Settings**.
 
 ## Staying up to date
 
-Loonie checks for new versions automatically (every 30 minutes, and once on launch). When one is
-available you'll see an **Update available** pill in the header — click it, then "Update &
-restart now", and Loonie downloads the update, restarts the backend, and relaunches itself on the
-new version. No need to re-run the installer or visit this page again.
-
-You can also check manually any time from **Settings → Version & updates**. See
-[CHANGELOG.md](CHANGELOG.md) for what's new in each release.
-
-## Requirements
-
-- Windows 10/11 (macOS/Linux packaging not available yet)
-- Python 3.11+ (installed automatically by the quick-install script)
-- Optional: a local LLM server (e.g. LM Studio) for AI insights — every core feature works
-  without AI enabled
-
-## How it works
-
-Loonie is a native desktop shell (Tauri) around a React frontend. On launch, it automatically
-starts your local FastAPI backend (or reuses one already running on port 8000) and shuts it down
-again when you close the app. Your data lives entirely in a local SQLite file under
-`%LOCALAPPDATA%\Loonie\backend\data\lifeos.db` — nothing is sent anywhere unless you explicitly
-enable an AI provider. The backend source ships inside the installer itself, so app updates keep
-the backend in sync automatically — nothing extra to download or copy.
-
-## Jumpstart tutorials
-
-- [ ] Setting up your first budget and categories
-- [ ] Importing a bank statement (CSV/PDF)
-- [ ] Setting goals and tracking net worth
-- [ ] Connecting a local LLM for AI insights
-- [ ] Using the Decision Maker
-
-## Extensions / try these
-
-- [ ] Custom category rules for auto-categorizing statement imports
-- [ ] Scenario sandbox (best/expected/worst-case net worth projections)
-- [ ] Investment watchlist & research topics
-- [ ] Wealth agents (budget analyzer, risk/diversification, asset advisor, goal planner)
+Loonie checks for updates automatically. When one is available you'll see an **Update available**
+pill in the header — click it, then **Update & restart now**. You can also check under
+**Settings → Version & updates**. See [CHANGELOG.md](CHANGELOG.md) for what's new.
 
 ## Privacy & security
 
-- All data lives in a local SQLite file on your machine — never uploaded anywhere.
-- AI features are opt-in and can be fully disabled in `config.yaml`.
-- Each install generates its own random JWT signing key (never shared across installs).
-- This is single-user, local-network software — don't expose port 8000 to the public internet
-  without adding proper hardening first.
+- All data lives in a private local database on your machine — never uploaded anywhere.
+- Marketplace blueprints only receive the data categories you explicitly grant, enforced by the
+  engine itself. Publishers never receive your data.
+- AI features are opt-in; secrets you enter in Settings are never displayed back.
+- Each install generates its own random signing key.
 
-## Known limitations (early access)
+## Requirements
 
-- Windows only for now.
-- No in-app "change password" screen yet — the bootstrap admin password is only set once, on the
-  very first run. Edit `config.yaml` *before* first launch if you want a different password.
+- Windows 10/11 (macOS/Linux coming later)
+- Python 3.11+
+- Optional: LM Studio, Ollama or another local model server for AI features
+
+## Built with
+
+Loonie's agent and marketplace patterns are shared as open source in
+[LocalAgents](https://localagents.ai).
 
 ## License
 

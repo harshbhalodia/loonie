@@ -27,7 +27,7 @@ def ask(state: str, questions: dict, timeout: float = 60) -> dict:
     cfg = get_jev_config()
     api_key = cfg.get("api_key")
     if not cfg.get("enabled", False) or not api_key:
-        raise JevError("Jev is not enabled. Add your API key under `jev:` in config/config.yaml.")
+        raise JevError("Jev is not enabled. Add your API key under Settings → Decision Maker (Jev).")
 
     base_url = cfg.get("base_url") or DEFAULT_BASE_URL
     model = cfg.get("model") or "jev-latest"

@@ -5,10 +5,30 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.deps import get_current_user
 from app.models import User
-from app.schemas import LoginRequest, TokenResponse, UserOut, UserSettingsIn
+from app.schemas import LoginRequest, SetupRequest, SetupStatusOut, TokenResponse, UserOut, UserSettingsIn
 from app.security import create_access_token, hash_password, verify_password
+from app.services.defaults import seed_default_category_groups
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/setup-status", response_model=SetupStatusOut)
+def setup_status(db: Session = Depends(get_db)) -> SetupStatusOut:
+    return SetupStatusOut(needs_setup=db.query(User).count() == 0)
+
+
+@router.post("/setup", response_model=TokenResponse)
+def first_run_setup(payload: SetupRequest, db: Session = Depends(get_db)) -> TokenResponse:
+    """Creates the owner account on a brand-new install. Only ever works while zero users exist —
+    once any account is created this permanently returns 409, so it can't be used to add users."""
+    if db.query(User).count() > 0:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Loonie is already set up. Please sign in.")
+    user = User(email=payload.email.lower(), password_hash=hash_password(payload.password))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    seed_default_category_groups(db, user.id)
+    return TokenResponse(access_token=create_access_token(user.id))
 
 
 @router.post("/login", response_model=TokenResponse)

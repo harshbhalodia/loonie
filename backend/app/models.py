@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, date
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -283,6 +283,79 @@ class WealthTopic(Base):
         String, ForeignKey("wealth_goals.id", ondelete="SET NULL"), nullable=True
     )
     priority: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class MarketplaceInstalledBlueprint(Base):
+    """One blueprint a user has installed from the Marketplace catalog (bundled declarative YAML
+    definitions today, a hosted registry in the future — see services/marketplace_catalog.py).
+    Free blueprints install with license_token=None; paid blueprints require a signed demo
+    token (services/marketplace_license.py) verified before the row is created."""
+
+    __tablename__ = "marketplace_installed_blueprints"
+    __table_args__ = (UniqueConstraint("user_id", "blueprint_id", name="uq_marketplace_install_user_blueprint"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    blueprint_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    version: Mapped[str] = mapped_column(String, nullable=False)
+    tier: Mapped[str] = mapped_column(String, nullable=False)  # free | paid
+    license_token: Mapped[str | None] = mapped_column(String, nullable=True)
+    installed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class MarketplaceDataGrant(Base):
+    """The user's explicit, per-blueprint consent for which computed wealth data categories
+    (see services/wealth_scopes.py) may ever be sent to that blueprint's prompts.
+
+    A blueprint's manifest `inputs` are only a REQUEST; a run is only permitted when every
+    requested (and recognized) scope is present in `granted_scopes_json` here — enforced in
+    services/marketplace_runner.py, never bypassed by a blueprint's own declared inputs alone.
+    `blueprint_version` records which version the user was actually shown when they granted, for
+    the audit trail; the enforcement check itself compares scope IDs, not versions.
+    """
+
+    __tablename__ = "marketplace_data_grants"
+    __table_args__ = (UniqueConstraint("user_id", "blueprint_id", name="uq_marketplace_grant_user_blueprint"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    blueprint_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    blueprint_version: Mapped[str] = mapped_column(String, nullable=False)
+    granted_scopes_json: Mapped[str] = mapped_column(Text, nullable=False)  # JSON list[str]
+    granted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class MarketplaceBlueprintRun(Base):
+    """One historical run of a marketplace blueprint against the user's own data.
+
+    `blueprint_version` is frozen at the version that actually ran (not looked up live from the
+    catalog), so a user can compare results across a publisher's versions over time even after
+    the catalog entry has been updated. `facts_json` is the user's OWN data they were evaluated
+    against — always visible back to them — never sent anywhere by itself; a separate, explicit
+    export step (services/marketplace_feedback.py) is required before anything about a run can
+    be shared with a blueprint's publisher, and that export is precision-reduced first.
+    """
+
+    __tablename__ = "marketplace_blueprint_runs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    blueprint_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    blueprint_version: Mapped[str] = mapped_column(String, nullable=False)
+    tier: Mapped[str] = mapped_column(String, nullable=False)  # free | paid
+    status: Mapped[str] = mapped_column(String, nullable=False)  # ok | error
+    facts_json: Mapped[str] = mapped_column(Text, nullable=False)
+    result: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The exact data scopes (see services/wealth_scopes.py) actually authorized and sent for
+    # THIS run — an immutable per-run audit trail, independent of the grant's current state.
+    shared_scopes_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # User's own private feedback on this run — never shared unless they explicitly export it.
+    user_rating: Mapped[str | None] = mapped_column(String, nullable=True)  # helpful | not_helpful
+    user_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    shared_with_publisher_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

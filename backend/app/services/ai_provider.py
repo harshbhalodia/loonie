@@ -80,7 +80,7 @@ def generate(system_prompt: str, user_input: str, timeout: float | None = 60) ->
     """
     cfg = get_ai_config()
     if not cfg.get("enabled", False):
-        raise AIProviderError("AI is not enabled. Configure it under Settings > AI.")
+        raise AIProviderError("AI is not enabled. Turn it on under Settings → AI model.")
 
     endpoint = cfg.get("endpoint")
     model = cfg.get("model")

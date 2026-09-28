@@ -2,6 +2,12 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.2.0 -- 2026-09-28
+
+- New look: Loonie coin logo, light and dark themes, quick actions on the dashboard and a smoother setup tour. Blueprint Marketplace with per-blueprint data consent, run history and Blueprint Studio. Create your account on first launch and connect AI, Jev and Google Drive from Settings - no config files.
+
+
+
 ## 0.1.5 -- 2026-09-22
 
 - Update button is now a prominent blue 'Update' button (header pill + Settings) that downloads and installs the latest version directly, instead of just a message pointing elsewhere

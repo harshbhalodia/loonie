@@ -20,9 +20,10 @@ database:
 auth:
   jwt_secret: change-me-to-a-long-random-string
   access_token_expire_minutes: 43200 # 30 days
-  # Bootstrap admin, only used the first time the app starts with zero users.
-  initial_admin_email: admin@example.com
-  initial_admin_password: change-me
+  # Optional headless bootstrap. Leave both empty (the default) and Loonie asks you to create your
+  # account on first launch instead.
+  initial_admin_email: ""
+  initial_admin_password: ""
 
 # AI is entirely optional — every core feature works without it.
 ai:
@@ -49,3 +50,35 @@ jev:
   api_key: ""
   base_url: https://api.typesafe.ai/v1/systemone
   model: jev-latest
+
+# Google Drive backup — optional, off by default. Backs up the local database + statement PDFs
+# to a "Loonie Backups" folder in your own Google Drive, so a hardware failure doesn't mean
+# losing your data. Uses the narrow `drive.file` scope — Google only lets this app see files it
+# created itself, never the rest of your Drive.
+#
+# Setup (one-time, ~5 min):
+#   1. Go to https://console.cloud.google.com/ and create a new project (or reuse one).
+#   2. Enable the "Google Drive API" for that project (APIs & Services -> Library).
+#   3. APIs & Services -> OAuth consent screen: choose "External", fill the required fields,
+#      then add your own Google account under "Test users" (keeps it in testing mode — no
+#      Google review needed for personal use).
+#   4. APIs & Services -> Credentials -> Create Credentials -> OAuth client ID -> Application
+#      type "Desktop app". Copy the generated Client ID and Client Secret below.
+#   5. Set enabled: true, restart Loonie, then connect from Settings -> Google Drive backup.
+google_drive:
+  enabled: false
+  client_id: ""
+  client_secret: ""
+
+# Blueprint Marketplace: browse/install/run declarative stress-test blueprints (free or paid,
+# in-house or third-party e.g. a bank's advisory team). Blueprints are bundled YAML data under
+# backend/app/marketplace_catalog/, never executable code — see
+# https://github.com/harshbhalodia/localagents/blob/main/docs/architecture/blueprint-marketplace.md
+# for the full design. There is no hosted marketplace/payment backend yet, so paid-blueprint
+# licensing below is a local, offline DEMO stand-in — never treat demo_license_secret as real
+# payment security.
+marketplace:
+  # When true, POST /marketplace/dev/demo-license issues a signed license for any paid
+  # blueprint without a real purchase — turn this off once a real entitlement service exists.
+  demo_mode: true
+  demo_license_secret: change-me-marketplace-secret

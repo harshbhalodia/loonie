@@ -1,11 +1,11 @@
 {
-    "version":  "0.1.5",
-    "notes":  "Update button is now a prominent blue \u0027Update\u0027 button (header pill + Settings) that downloads and installs the latest version directly, instead of just a message pointing elsewhere",
-    "pub_date":  "2026-09-22T03:40:01Z",
+    "version":  "0.2.0",
+    "notes":  "New look: Loonie coin logo, light and dark themes, quick actions on the dashboard and a smoother setup tour. Blueprint Marketplace with per-blueprint data consent, run history and Blueprint Studio. Create your account on first launch and connect AI, Jev and Google Drive from Settings - no config files.",
+    "pub_date":  "2026-09-28T01:36:40Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkxua3k1cXpvaVEyZk5aR0ZMa0Z2YU8zWU1WU1piNTI5cFRrZDFaem1VTzZVcFVjNDROTnUvOGNWamdHNVRWR3Y0UFUrQmtjemQ3T0tIYitqOXV4endBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDQ4NDAxCWZpbGU6TG9vbmllXzAuMS41X3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjEuNQp6WXRGbmlnQTdhalBMMmxtQUZoQnBMWTk2eFZOenpoK255SlA0VFFGaHgvMVhKUE5mWW44M1JQalRuR1d4S3NSK3lNcVh3ZTJkc0xMVGZWUm9qMm5BQT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.1.5_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkwxZGJqNWIySmFTL3UyNUdSUWZ1U1F6ZFpRMUJKMU9ybjlHVGZQMVlzdWYyci9XMjlIMExoRHhKeGNCOEtGakRuQkZWdlRHYzFaMlcyc0h5N21RY1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNTU5NDAwCWZpbGU6TG9vbmllXzAuMi4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjIuMAovWmVTM0UwSUxyZ1kvYU15NzYybWFpZDdhNWtUdUpKNjIwN0RMajVvVTZpV2ZhQnNqVGIxOXZ6YThOM2FOaEZsUjlJV0w4azhBWEV0L3NlempMVnhCUT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.2.0_x64-setup.exe"
                                          }
                   }
 }
