@@ -36,7 +36,7 @@ from app.routers import (
 )
 from app.services import accounts as account_service
 from app.services import cloud_sync
-from app.services.google_drive import apply_pending_restore_if_any
+from app.services.drive_restore import apply_pending_restore_if_any
 from app.services.job_queue import start_worker
 from app.services.legacy_migration import migrate_legacy_database_if_needed
 

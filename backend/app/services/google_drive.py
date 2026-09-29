@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import base64
 import hashlib
-import io
 import json
 import logging
 import re
@@ -33,12 +32,9 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
 
-from app.config import DATA_DIR, USERS_DIR, get_database_path, get_google_drive_config, user_db_path, user_dir
+from app.config import get_google_drive_config, user_db_path, user_dir
 
 log = logging.getLogger("loonie.drive")
-
-LEGACY_RESTORE_STAGING_DIR = DATA_DIR / "_pending_restore"
-LEGACY_PENDING_RESTORE_MARKER = DATA_DIR / ".pending_restore.json"
 
 SCOPE = "https://www.googleapis.com/auth/drive.file"
 AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -328,107 +324,3 @@ def list_backups(user_id: str) -> list[dict]:
         if f["name"].startswith(prefix) or _LEGACY_BACKUP_NAME.match(f["name"])
     ]
 
-
-def stage_restore(user_id: str, file_id: str) -> None:
-    """Downloads + extracts the chosen backup into a staging dir and drops a marker file.
-    The actual swap happens on next startup (`apply_pending_restore_if_any`), before the account's
-    DB engine ever opens a connection, so there's no SQLite file-lock conflict with this running
-    process."""
-    access_token = _get_access_token(user_id)
-    resp = httpx.get(
-        f"{DRIVE_FILES_ENDPOINT}/{file_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        params={"alt": "media"},
-        timeout=120,
-    )
-    resp.raise_for_status()
-
-    folder = user_dir(user_id)
-    staging = folder / "_pending_restore"
-    if staging.exists():
-        shutil.rmtree(staging)
-    staging.mkdir(parents=True)
-    with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
-        for member in zf.infolist():
-            target = (staging / member.filename).resolve()
-            if staging.resolve() not in target.parents and target != staging.resolve():
-                raise GoogleDriveError("Backup archive contains an unsafe path.")
-        zf.extractall(staging)
-
-    (folder / ".pending_restore.json").write_text(json.dumps({"file_id": file_id, "staged_at": time.time()}), encoding="utf-8")
-
-
-def _apply_account_restore(user_id: str) -> None:
-    from app.services import legacy_migration
-
-    folder = user_dir(user_id)
-    staging = folder / "_pending_restore"
-    marker = folder / ".pending_restore.json"
-    try:
-        staged_db = staging / "lifeos.db"
-        db_path = user_db_path(user_id)
-        if staged_db.exists():
-            if db_path.exists():
-                shutil.move(str(db_path), str(db_path.with_name(f"lifeos.pre-restore-{int(time.time())}.db")))
-            shutil.move(str(staged_db), str(db_path))
-
-        staged_statements = staging / "statements"
-        statements_dir = folder / "statements"
-        if staged_statements.exists():
-            # Backups taken before per-account folders nested statements one level deeper (by user id).
-            legacy_nested = staged_statements / user_id
-            source = legacy_nested if legacy_nested.exists() else staged_statements
-            if statements_dir.exists():
-                shutil.rmtree(statements_dir)
-            shutil.move(str(source), str(statements_dir))
-
-        if db_path.exists():
-            con = sqlite3.connect(str(db_path))
-            try:
-                has_user = con.execute("SELECT 1 FROM users WHERE id = ?", (user_id,)).fetchone() is not None
-            except sqlite3.Error:
-                has_user = False
-            finally:
-                con.close()
-            if has_user:
-                legacy_migration._prune_to_user(db_path, user_id)  # noqa: SLF001 - shared helper
-            legacy_migration._rewrite_statement_paths(db_path, user_id)  # noqa: SLF001
-    finally:
-        shutil.rmtree(staging, ignore_errors=True)
-        marker.unlink(missing_ok=True)
-
-
-def _apply_legacy_restore() -> None:
-    """Handles a restore staged by an older version, before accounts had their own folders."""
-    try:
-        db_path = get_database_path()
-        staged_db = LEGACY_RESTORE_STAGING_DIR / db_path.name
-        if staged_db.exists():
-            if db_path.exists():
-                shutil.move(str(db_path), str(db_path.with_name(f"{db_path.stem}.pre-restore-{int(time.time())}{db_path.suffix}")))
-            shutil.move(str(staged_db), str(db_path))
-        staged_statements = LEGACY_RESTORE_STAGING_DIR / "statements"
-        statements_dir = DATA_DIR / "statements"
-        if staged_statements.exists():
-            if statements_dir.exists():
-                shutil.rmtree(statements_dir)
-            shutil.move(str(staged_statements), str(statements_dir))
-    finally:
-        shutil.rmtree(LEGACY_RESTORE_STAGING_DIR, ignore_errors=True)
-        LEGACY_PENDING_RESTORE_MARKER.unlink(missing_ok=True)
-
-
-def apply_pending_restore_if_any() -> None:
-    """Called first thing at backend startup, before any DB access. Swaps in restores staged by
-    `stage_restore` for any account."""
-    if LEGACY_PENDING_RESTORE_MARKER.exists():
-        _apply_legacy_restore()
-    if not USERS_DIR.exists():
-        return
-    for folder in USERS_DIR.iterdir():
-        if (folder / ".pending_restore.json").exists():
-            try:
-                _apply_account_restore(folder.name)
-                log.info("restored account %s from Google Drive backup", folder.name)
-            except Exception:  # noqa: BLE001 - never block startup on a bad restore
-                log.exception("restore failed for account %s", folder.name)

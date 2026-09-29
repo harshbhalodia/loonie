@@ -1,11 +1,11 @@
 {
-    "version":  "0.3.0",
-    "notes":  "Multiple accounts, account chooser and Loonie Cloud sync",
-    "pub_date":  "2026-09-29T01:43:03Z",
+    "version":  "0.3.1",
+    "notes":  "Fix restoring backups and sign-in after restore; restore now applies immediately for the signed-in account only",
+    "pub_date":  "2026-09-29T02:41:55Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkd2a29TSzloS1E3Szh6N1ZLMEpCMjFFYkxhdDhBSTkvUDVCVzRiQ0lPZmRwWkovQlFVeUJSQWhQMy82MVBqVFU0R2ZPY2Jjc2hYOFV0aGd5cHdaVlFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjQ2MTgyCWZpbGU6TG9vbmllXzAuMy4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMApZa3htTm42a2htblF1SUNVVGV6c1drakNWWDBscjc2MWFmTjVsd05ZcWR2S0srY1paMUhMZmtqRmx4L1BSMXF3YUZ1cnUwN1gvNEVjb01tbWprbUVBQT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.3.0_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkFhdjdCazVMN3JMSlZrSVBGenR3a0xuVnZrcjVGa2NEeWlBb2d4ZW54Q2dSdkJoZ0FtRjNrWHlSUUgwcE5xR2xTMXVWVnlBSmplUGNWa0JtNWZiL2drPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjQ5NzE1CWZpbGU6TG9vbmllXzAuMy4xX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMQpDNnR6YzY1TTNPVUhLdURRWWc2NUl3bUpxcDg3cEtEZXBlZVFqWFRBUCt3eU8yME42YWxRQnBDanBXTlVzSHZTU2Vic3BhOWVWY1lNcTc1R0dQUTVCUT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.3.1_x64-setup.exe"
                                          }
                   }
 }

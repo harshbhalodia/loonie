@@ -3,10 +3,10 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.config import get_google_drive_config
-from app.deps import get_current_user
+from app.deps import get_current_user, get_current_user_id
 from app.models import User
 from app.registry import Account, RegistrySession
-from app.services import google_drive
+from app.services import drive_restore, google_drive
 
 log = logging.getLogger("loonie.backup")
 
@@ -51,12 +51,14 @@ def list_backups(user: User = Depends(get_current_user)):
 
 
 @router.post("/restore/{file_id}")
-def restore(file_id: str, user: User = Depends(get_current_user)):
+def restore(file_id: str, user_id: str = Depends(get_current_user_id)):
+    """Replaces only the signed-in account's database and statements with the chosen backup.
+    Deliberately takes no database session, so nothing here holds the file open while it is swapped."""
     try:
-        google_drive.stage_restore(user.id, file_id)
+        return {"status": drive_restore.restore_backup(user_id, file_id)}
     except Exception as exc:
+        log.warning("restore failed: %s", exc)
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return {"status": "restart_required"}
 
 
 # No auth, loopback-only: the desktop shell (src-tauri) calls this right before it exits so a

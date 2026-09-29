@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.3.1 -- 2026-09-29
+
+- Fix restoring backups and sign-in after restore; restore now applies immediately for the signed-in account only
+
 ## 0.3.0 -- 2026-09-29
 
 - Multiple accounts, account chooser and Loonie Cloud sync
