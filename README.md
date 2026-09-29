@@ -27,7 +27,9 @@ irm https://raw.githubusercontent.com/harshbhalodia/loonie/main/install.ps1 | ie
 
 1. Loonie starts its private local engine. The very first launch can take a minute while it sets
    itself up — you'll see a "Starting…" screen.
-2. **Create your account** — an email and password that live only on this computer.
+2. **Create your account** — an email and password. Each account has its own separate workspace,
+   so several people can share one PC. Next time, pick your account from the chooser (or sign in
+   as a different user).
 3. A short guided tour helps you add a goal and an account, and optionally connect an AI model.
 
 No config files to edit — everything is set up inside the app.
@@ -55,6 +57,8 @@ OpenAI-compatible server), enter the model name, and click **Save & test connect
 - **Decision Maker:** describe a decision and options; Jev picks the best fit for your profile.
   Add a free API key under **Settings → Decision Maker**.
 - **Google Drive backup:** optional off-site backup & restore, set up under **Settings**.
+- **Loonie Cloud sync:** optional. Link an account under **Settings → Loonie Cloud** and its data
+  syncs automatically across your devices.
 
 ## Staying up to date
 
@@ -64,7 +68,8 @@ pill in the header — click it, then **Update & restart now**. You can also che
 
 ## Privacy & security
 
-- All data lives in a private local database on your machine — never uploaded anywhere.
+- Your data stays on your machine, in a separate folder per account, unless you choose to link
+  Loonie Cloud or Google Drive backup.
 - Marketplace blueprints only receive the data categories you explicitly grant, enforced by the
   engine itself. Publishers never receive your data.
 - AI features are opt-in; secrets you enter in Settings are never displayed back.
