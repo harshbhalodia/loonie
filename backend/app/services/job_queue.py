@@ -5,6 +5,9 @@ never concurrently — so uploading many statements at once never sends overlapp
 LM Studio/Ollama/etc, and each request is built completely fresh with no shared context between
 jobs (ai_provider.generate() is already a single stateless call per job).
 
+Every account has its own database, so queue items are (account id, job id) and the worker opens
+the right account's database for each job.
+
 In-memory queue: jobs are re-queued from any row still `queued`/`processing` at startup (e.g.
 after a restart mid-processing), but are otherwise not persisted across process restarts beyond
 that recovery pass.
@@ -12,21 +15,25 @@ that recovery pass.
 from __future__ import annotations
 
 import json
+import logging
 import queue
 import threading
 from datetime import datetime
 
-from app.database import SessionLocal
+from app.database import user_session
 from app.models import WealthJob, WealthStatementImport
+from app.registry import Account, RegistrySession
 from app.services import statement_parsing, statement_store
 
-_queue: "queue.Queue[str]" = queue.Queue()
+log = logging.getLogger("loonie.jobs")
+
+_queue: "queue.Queue[tuple[str, str]]" = queue.Queue()
 _worker_thread: threading.Thread | None = None
 _lock = threading.Lock()
 
 
-def enqueue_job(job_id: str) -> None:
-    _queue.put(job_id)
+def enqueue_job(user_id: str, job_id: str) -> None:
+    _queue.put((user_id, job_id))
 
 
 def _fail_job(db, job: WealthJob, message: str) -> None:
@@ -70,8 +77,8 @@ def _process_statement_parse(db, job: WealthJob) -> None:
     db.commit()
 
 
-def _run_job(job_id: str) -> None:
-    db = SessionLocal()
+def _run_job(user_id: str, job_id: str) -> None:
+    db = user_session(user_id)
     try:
         job = db.get(WealthJob, job_id)
         if not job:
@@ -92,6 +99,7 @@ def _run_job(job_id: str) -> None:
             db.add(job)
             db.commit()
         except Exception as exc:  # noqa: BLE001 - the worker must never die, always record the error
+            log.exception("job %s failed", job_id)
             _fail_job(db, job, str(exc))
     finally:
         db.close()
@@ -99,9 +107,11 @@ def _run_job(job_id: str) -> None:
 
 def _worker_loop() -> None:
     while True:
-        job_id = _queue.get()
+        user_id, job_id = _queue.get()
         try:
-            _run_job(job_id)
+            _run_job(user_id, job_id)
+        except Exception:  # noqa: BLE001 - keep the worker alive
+            log.exception("worker error on job %s", job_id)
         finally:
             _queue.task_done()
 
@@ -116,14 +126,22 @@ def start_worker() -> None:
         _worker_thread = threading.Thread(target=_worker_loop, name="wealth-job-worker", daemon=True)
         _worker_thread.start()
 
-    db = SessionLocal()
-    try:
-        pending = db.query(WealthJob).filter(WealthJob.status.in_(["queued", "processing"])).order_by(WealthJob.created_at).all()
-        for job in pending:
-            job.status = "queued"
-            db.add(job)
-        db.commit()
-        for job in pending:
-            enqueue_job(job.id)
-    finally:
-        db.close()
+    with RegistrySession() as registry:
+        user_ids = [a.id for a in registry.query(Account).all()]
+    for user_id in user_ids:
+        db = user_session(user_id)
+        try:
+            pending = (
+                db.query(WealthJob)
+                .filter(WealthJob.status.in_(["queued", "processing"]))
+                .order_by(WealthJob.created_at)
+                .all()
+            )
+            for job in pending:
+                job.status = "queued"
+                db.add(job)
+            db.commit()
+            for job in pending:
+                enqueue_job(user_id, job.id)
+        finally:
+            db.close()

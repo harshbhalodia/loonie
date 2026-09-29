@@ -20,6 +20,8 @@ database:
 auth:
   jwt_secret: change-me-to-a-long-random-string
   access_token_expire_minutes: 43200 # 30 days
+  # Lets anyone using this install create their own account (each gets a separate data folder).
+  allow_registration: true
   # Optional headless bootstrap. Leave both empty (the default) and Loonie asks you to create your
   # account on first launch instead.
   initial_admin_email: ""
@@ -50,6 +52,12 @@ jev:
   api_key: ""
   base_url: https://api.typesafe.ai/v1/systemone
   model: jev-latest
+
+# Loonie Cloud — optional sync of an account's data across devices. Each user links their own
+# account from Settings -> Loonie Cloud; nothing syncs until they do. Point base_url at the
+# cloud service (see cloud/README.md). It must be https:// unless it is localhost.
+cloud:
+  base_url: ""
 
 # Google Drive backup — optional, off by default. Backs up the local database + statement PDFs
 # to a "Loonie Backups" folder in your own Google Drive, so a hardware failure doesn't mean

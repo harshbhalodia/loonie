@@ -1,4 +1,7 @@
-"""Google Drive backup/restore for the local database + statement PDFs.
+"""Google Drive backup/restore for an account's own data folder (database + statement PDFs).
+
+Every account connects and backs up separately: its Drive token, backups and restore staging all
+live inside that account's folder (`backend/data/users/<id>/`).
 
 Uses the narrow `drive.file` OAuth scope (the app can only see files it created itself) and a
 hand-rolled Authorization Code + PKCE loopback flow — no Google client SDK needed, just httpx,
@@ -13,6 +16,8 @@ import base64
 import hashlib
 import io
 import json
+import logging
+import re
 import secrets
 import shutil
 import sqlite3
@@ -28,12 +33,12 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
 
-from app.config import BACKEND_DIR, get_database_path, get_google_drive_config
+from app.config import DATA_DIR, USERS_DIR, get_database_path, get_google_drive_config, user_db_path, user_dir
 
-DATA_DIR = BACKEND_DIR / "data"
-TOKEN_PATH = DATA_DIR / "google_drive_token.json"
-RESTORE_STAGING_DIR = DATA_DIR / "_pending_restore"
-PENDING_RESTORE_MARKER = DATA_DIR / ".pending_restore.json"
+log = logging.getLogger("loonie.drive")
+
+LEGACY_RESTORE_STAGING_DIR = DATA_DIR / "_pending_restore"
+LEGACY_PENDING_RESTORE_MARKER = DATA_DIR / ".pending_restore.json"
 
 SCOPE = "https://www.googleapis.com/auth/drive.file"
 AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -43,49 +48,60 @@ DRIVE_UPLOAD_ENDPOINT = "https://www.googleapis.com/upload/drive/v3/files"
 BACKUP_FOLDER_NAME = "Loonie Backups"
 
 _oauth_lock = threading.Lock()
-_oauth_state: dict = {"status": "idle", "error": None}  # idle | connecting | connected | error
+# Per-account connect progress: idle | connecting | connected | error
+_oauth_state: dict[str, dict] = {}
 
 
 class GoogleDriveError(RuntimeError):
     pass
 
 
+def _token_path(user_id: str) -> Path:
+    return user_dir(user_id) / "google_drive_token.json"
+
+
+def _backup_prefix(user_id: str) -> str:
+    return f"loonie-backup-{user_id[:8]}-"
+
+
 # ---------------------------------------------------------------------------
 # Token storage
 # ---------------------------------------------------------------------------
 
-def _load_token() -> dict | None:
-    if not TOKEN_PATH.exists():
+def _load_token(user_id: str) -> dict | None:
+    path = _token_path(user_id)
+    if not path.exists():
         return None
     try:
-        return json.loads(TOKEN_PATH.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
 
 
-def _save_token(token: dict) -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    TOKEN_PATH.write_text(json.dumps(token), encoding="utf-8")
+def _save_token(user_id: str, token: dict) -> None:
+    path = _token_path(user_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(token), encoding="utf-8")
 
 
-def is_connected() -> bool:
-    return _load_token() is not None
+def is_connected(user_id: str) -> bool:
+    return _load_token(user_id) is not None
 
 
-def disconnect() -> None:
-    TOKEN_PATH.unlink(missing_ok=True)
+def disconnect(user_id: str) -> None:
+    _token_path(user_id).unlink(missing_ok=True)
     with _oauth_lock:
-        _oauth_state["status"] = "idle"
-        _oauth_state["error"] = None
+        _oauth_state[user_id] = {"status": "idle", "error": None}
 
 
-def get_status() -> dict:
+def get_status(user_id: str) -> dict:
     cfg = get_google_drive_config()
     with _oauth_lock:
-        oauth_status, error = _oauth_state["status"], _oauth_state["error"]
+        state = _oauth_state.get(user_id, {"status": "idle", "error": None})
+        oauth_status, error = state["status"], state["error"]
     return {
         "configured": bool(cfg.get("client_id") and cfg.get("client_secret")),
-        "connected": is_connected(),
+        "connected": is_connected(user_id),
         "connecting": oauth_status == "connecting",
         "error": error,
     }
@@ -108,22 +124,21 @@ class _CallbackHandler(BaseHTTPRequestHandler):
         pass
 
 
-def start_connect() -> None:
+def start_connect(user_id: str) -> None:
     cfg = get_google_drive_config()
     if not cfg.get("client_id") or not cfg.get("client_secret"):
         raise GoogleDriveError("Add your Google OAuth client ID and secret under Settings → Google Drive backup first.")
 
     with _oauth_lock:
-        if _oauth_state["status"] == "connecting":
+        if _oauth_state.get(user_id, {}).get("status") == "connecting":
             return
-        _oauth_state["status"] = "connecting"
-        _oauth_state["error"] = None
+        _oauth_state[user_id] = {"status": "connecting", "error": None}
 
-    thread = threading.Thread(target=_run_oauth_flow, args=(dict(cfg),), daemon=True)
+    thread = threading.Thread(target=_run_oauth_flow, args=(user_id, dict(cfg)), daemon=True)
     thread.start()
 
 
-def _run_oauth_flow(cfg: dict) -> None:
+def _run_oauth_flow(user_id: str, cfg: dict) -> None:
     try:
         client_id = cfg["client_id"]
         client_secret = cfg["client_secret"]
@@ -172,19 +187,18 @@ def _run_oauth_flow(cfg: dict) -> None:
         response.raise_for_status()
         token = response.json()
         token["obtained_at"] = time.time()
-        _save_token(token)
+        _save_token(user_id, token)
 
         with _oauth_lock:
-            _oauth_state["status"] = "connected"
-            _oauth_state["error"] = None
+            _oauth_state[user_id] = {"status": "connected", "error": None}
     except Exception as exc:  # noqa: BLE001 - surfaced to the user via /status, not raised
+        log.warning("Google Drive connect failed: %s", exc)
         with _oauth_lock:
-            _oauth_state["status"] = "error"
-            _oauth_state["error"] = str(exc)
+            _oauth_state[user_id] = {"status": "error", "error": str(exc)}
 
 
-def _get_access_token() -> str:
-    token = _load_token()
+def _get_access_token(user_id: str) -> str:
+    token = _load_token(user_id)
     if not token:
         raise GoogleDriveError("Google Drive is not connected.")
 
@@ -203,7 +217,7 @@ def _get_access_token() -> str:
     token["access_token"] = refreshed["access_token"]
     token["expires_in"] = refreshed.get("expires_in", 3600)
     token["obtained_at"] = time.time()
-    _save_token(token)
+    _save_token(user_id, token)
     return token["access_token"]
 
 
@@ -236,15 +250,16 @@ def _build_multipart_body(boundary: str, metadata: dict, media: bytes, media_typ
     return head.encode() + media_head.encode() + media + f"\r\n--{boundary}--".encode()
 
 
-def _build_backup_zip() -> Path:
-    """Snapshots the DB via sqlite3's own backup API (avoids zipping a file mid-write), plus
-    the statements folder, into one zip under backend/data/."""
-    staging = DATA_DIR / f"_backup_staging_{uuid.uuid4().hex}"
+def _build_backup_zip(user_id: str) -> Path:
+    """Snapshots the account's DB via sqlite3's own backup API (avoids zipping a file mid-write),
+    plus its statements folder, into one zip inside the account's folder."""
+    folder = user_dir(user_id)
+    staging = folder / f"_backup_staging_{uuid.uuid4().hex}"
     staging.mkdir(parents=True, exist_ok=True)
     try:
-        db_path = get_database_path()
+        db_path = user_db_path(user_id)
         if db_path.exists():
-            snapshot_path = staging / db_path.name
+            snapshot_path = staging / "lifeos.db"
             src_conn = sqlite3.connect(str(db_path))
             dst_conn = sqlite3.connect(str(snapshot_path))
             with dst_conn:
@@ -252,11 +267,11 @@ def _build_backup_zip() -> Path:
             src_conn.close()
             dst_conn.close()
 
-        statements_dir = DATA_DIR / "statements"
+        statements_dir = folder / "statements"
         if statements_dir.exists():
             shutil.copytree(statements_dir, staging / "statements")
 
-        zip_path = DATA_DIR / f"loonie-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
+        zip_path = folder / f"{_backup_prefix(user_id)}{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             for file in staging.rglob("*"):
                 if file.is_file():
@@ -266,14 +281,14 @@ def _build_backup_zip() -> Path:
         shutil.rmtree(staging, ignore_errors=True)
 
 
-def create_backup() -> dict:
+def create_backup(user_id: str) -> dict:
     cfg = get_google_drive_config()
     if not cfg.get("enabled", False):
         raise GoogleDriveError("Google Drive backup is turned off. Enable it under Settings → Google Drive backup.")
 
-    access_token = _get_access_token()
+    access_token = _get_access_token(user_id)
     folder_id = _ensure_backup_folder(access_token)
-    zip_path = _build_backup_zip()
+    zip_path = _build_backup_zip(user_id)
     try:
         boundary = uuid.uuid4().hex
         body = _build_multipart_body(
@@ -287,13 +302,17 @@ def create_backup() -> dict:
             timeout=120,
         )
         resp.raise_for_status()
+        log.info("Google Drive backup uploaded for account %s", user_id)
         return resp.json()
     finally:
         zip_path.unlink(missing_ok=True)
 
 
-def list_backups() -> list[dict]:
-    access_token = _get_access_token()
+_LEGACY_BACKUP_NAME = re.compile(r"^loonie-backup-\d{8}-\d{6}\.zip$")
+
+
+def list_backups(user_id: str) -> list[dict]:
+    access_token = _get_access_token(user_id)
     folder_id = _ensure_backup_folder(access_token)
     resp = httpx.get(
         DRIVE_FILES_ENDPOINT,
@@ -302,15 +321,20 @@ def list_backups() -> list[dict]:
         timeout=30,
     )
     resp.raise_for_status()
-    return resp.json().get("files", [])
+    prefix = _backup_prefix(user_id)
+    # Backups made before per-account folders have no account tag; they stay visible.
+    return [
+        f for f in resp.json().get("files", [])
+        if f["name"].startswith(prefix) or _LEGACY_BACKUP_NAME.match(f["name"])
+    ]
 
 
-def stage_restore(file_id: str) -> None:
+def stage_restore(user_id: str, file_id: str) -> None:
     """Downloads + extracts the chosen backup into a staging dir and drops a marker file.
-    The actual swap happens on next startup (`apply_pending_restore_if_any`), before the DB
-    engine ever opens a connection, so there's no SQLite file-lock conflict with this running
+    The actual swap happens on next startup (`apply_pending_restore_if_any`), before the account's
+    DB engine ever opens a connection, so there's no SQLite file-lock conflict with this running
     process."""
-    access_token = _get_access_token()
+    access_token = _get_access_token(user_id)
     resp = httpx.get(
         f"{DRIVE_FILES_ENDPOINT}/{file_id}",
         headers={"Authorization": f"Bearer {access_token}"},
@@ -319,35 +343,92 @@ def stage_restore(file_id: str) -> None:
     )
     resp.raise_for_status()
 
-    if RESTORE_STAGING_DIR.exists():
-        shutil.rmtree(RESTORE_STAGING_DIR)
-    RESTORE_STAGING_DIR.mkdir(parents=True)
+    folder = user_dir(user_id)
+    staging = folder / "_pending_restore"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
     with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
-        zf.extractall(RESTORE_STAGING_DIR)
+        for member in zf.infolist():
+            target = (staging / member.filename).resolve()
+            if staging.resolve() not in target.parents and target != staging.resolve():
+                raise GoogleDriveError("Backup archive contains an unsafe path.")
+        zf.extractall(staging)
 
-    PENDING_RESTORE_MARKER.write_text(json.dumps({"file_id": file_id, "staged_at": time.time()}), encoding="utf-8")
+    (folder / ".pending_restore.json").write_text(json.dumps({"file_id": file_id, "staged_at": time.time()}), encoding="utf-8")
 
 
-def apply_pending_restore_if_any() -> None:
-    """Called first thing at backend startup, before migrations/DB access. Swaps in a staged
-    restore left by `stage_restore`, if any."""
-    if not PENDING_RESTORE_MARKER.exists():
-        return
+def _apply_account_restore(user_id: str) -> None:
+    from app.services import legacy_migration
+
+    folder = user_dir(user_id)
+    staging = folder / "_pending_restore"
+    marker = folder / ".pending_restore.json"
     try:
-        db_path = get_database_path()
-        staged_db = RESTORE_STAGING_DIR / db_path.name
+        staged_db = staging / "lifeos.db"
+        db_path = user_db_path(user_id)
         if staged_db.exists():
             if db_path.exists():
-                backup_name = db_path.with_name(f"{db_path.stem}.pre-restore-{int(time.time())}{db_path.suffix}")
-                shutil.move(str(db_path), str(backup_name))
+                shutil.move(str(db_path), str(db_path.with_name(f"lifeos.pre-restore-{int(time.time())}.db")))
             shutil.move(str(staged_db), str(db_path))
 
-        staged_statements = RESTORE_STAGING_DIR / "statements"
+        staged_statements = staging / "statements"
+        statements_dir = folder / "statements"
+        if staged_statements.exists():
+            # Backups taken before per-account folders nested statements one level deeper (by user id).
+            legacy_nested = staged_statements / user_id
+            source = legacy_nested if legacy_nested.exists() else staged_statements
+            if statements_dir.exists():
+                shutil.rmtree(statements_dir)
+            shutil.move(str(source), str(statements_dir))
+
+        if db_path.exists():
+            con = sqlite3.connect(str(db_path))
+            try:
+                has_user = con.execute("SELECT 1 FROM users WHERE id = ?", (user_id,)).fetchone() is not None
+            except sqlite3.Error:
+                has_user = False
+            finally:
+                con.close()
+            if has_user:
+                legacy_migration._prune_to_user(db_path, user_id)  # noqa: SLF001 - shared helper
+            legacy_migration._rewrite_statement_paths(db_path, user_id)  # noqa: SLF001
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
+        marker.unlink(missing_ok=True)
+
+
+def _apply_legacy_restore() -> None:
+    """Handles a restore staged by an older version, before accounts had their own folders."""
+    try:
+        db_path = get_database_path()
+        staged_db = LEGACY_RESTORE_STAGING_DIR / db_path.name
+        if staged_db.exists():
+            if db_path.exists():
+                shutil.move(str(db_path), str(db_path.with_name(f"{db_path.stem}.pre-restore-{int(time.time())}{db_path.suffix}")))
+            shutil.move(str(staged_db), str(db_path))
+        staged_statements = LEGACY_RESTORE_STAGING_DIR / "statements"
         statements_dir = DATA_DIR / "statements"
         if staged_statements.exists():
             if statements_dir.exists():
                 shutil.rmtree(statements_dir)
             shutil.move(str(staged_statements), str(statements_dir))
     finally:
-        shutil.rmtree(RESTORE_STAGING_DIR, ignore_errors=True)
-        PENDING_RESTORE_MARKER.unlink(missing_ok=True)
+        shutil.rmtree(LEGACY_RESTORE_STAGING_DIR, ignore_errors=True)
+        LEGACY_PENDING_RESTORE_MARKER.unlink(missing_ok=True)
+
+
+def apply_pending_restore_if_any() -> None:
+    """Called first thing at backend startup, before any DB access. Swaps in restores staged by
+    `stage_restore` for any account."""
+    if LEGACY_PENDING_RESTORE_MARKER.exists():
+        _apply_legacy_restore()
+    if not USERS_DIR.exists():
+        return
+    for folder in USERS_DIR.iterdir():
+        if (folder / ".pending_restore.json").exists():
+            try:
+                _apply_account_restore(folder.name)
+                log.info("restored account %s from Google Drive backup", folder.name)
+            except Exception:  # noqa: BLE001 - never block startup on a bad restore
+                log.exception("restore failed for account %s", folder.name)

@@ -1,13 +1,12 @@
+import logging
 from contextlib import asynccontextmanager
 
-from alembic import command
-from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import BACKEND_DIR, get_auth_config, get_cors_origins
-from app.database import SessionLocal
-from app.models import User
+from app.config import get_auth_config, get_cors_origins
+from app.database import get_user_engine
+from app.registry import Account, RegistrySession, account_count
 from app.routers import (
     accounts,
     agents,
@@ -21,6 +20,7 @@ from app.routers import (
     categories,
     category_groups,
     category_rules,
+    cloud,
     decisions,
     entries,
     goals,
@@ -34,46 +34,65 @@ from app.routers import (
     topics,
     watchlist,
 )
-from app.security import hash_password
-from app.services.defaults import seed_default_category_groups
+from app.services import accounts as account_service
+from app.services import cloud_sync
 from app.services.google_drive import apply_pending_restore_if_any
 from app.services.job_queue import start_worker
+from app.services.legacy_migration import migrate_legacy_database_if_needed
+
+log = logging.getLogger("loonie")
 
 
-def _run_migrations() -> None:
-    """Applies any pending Alembic migrations, so a fresh install needs no manual step."""
-    cfg = Config(str(BACKEND_DIR / "alembic.ini"))
-    cfg.set_main_option("script_location", str(BACKEND_DIR / "alembic"))
-    command.upgrade(cfg, "head")
+def _configure_logging() -> None:
+    """Timestamped app log lines on stderr (captured to backend.log by the desktop shell)."""
+    logger = logging.getLogger("loonie")
+    if logger.handlers:
+        return
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 
 def _bootstrap_admin() -> None:
-    """Creates the initial local admin user the first time the app runs with zero users."""
-    db = SessionLocal()
-    try:
-        if db.query(User).count() > 0:
+    """Optional headless bootstrap: creates the first account from config on an empty install."""
+    with RegistrySession() as registry:
+        if account_count(registry) > 0:
             return
         cfg = get_auth_config()
         email = cfg.get("initial_admin_email")
         password = cfg.get("initial_admin_password")
         if not email or not password:
             return
-        user = User(email=email, password_hash=hash_password(password))
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        seed_default_category_groups(db, user.id)
-    finally:
-        db.close()
+        account_service.create_account(registry, email, password)
+
+
+def _open_all_accounts() -> None:
+    """Migrates every account's database at startup so the first sign-in is instant."""
+    with RegistrySession() as registry:
+        user_ids = [a.id for a in registry.query(Account).all()]
+    for user_id in user_ids:
+        try:
+            get_user_engine(user_id)
+        except Exception:  # noqa: BLE001 - one broken account must not stop the app
+            log.exception("could not open data for account %s", user_id)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    _configure_logging()
+    log.info("Loonie backend starting")
     apply_pending_restore_if_any()
-    _run_migrations()
+    migrate_legacy_database_if_needed()
     _bootstrap_admin()
+    _open_all_accounts()
     start_worker()
+    cloud_sync.start_worker()
+    log.info("Loonie backend ready")
     yield
+    cloud_sync.stop_worker()
+    log.info("Loonie backend stopping")
 
 
 app = FastAPI(title="Loonie API", version="0.1.0", lifespan=lifespan)
@@ -112,6 +131,7 @@ app.include_router(decisions.jev_router)
 app.include_router(backup.router)
 app.include_router(marketplace.router)
 app.include_router(settings.router)
+app.include_router(cloud.router)
 
 @app.get("/health")
 def health():

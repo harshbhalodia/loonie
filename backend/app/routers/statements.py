@@ -83,7 +83,7 @@ async def upload_statements(
         db.commit()
         db.refresh(stmt_import)
 
-        job_queue.enqueue_job(job.id)
+        job_queue.enqueue_job(user.id, job.id)
         created.append(stmt_import)
 
     return created

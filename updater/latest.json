@@ -1,11 +1,11 @@
 {
-    "version":  "0.2.0",
-    "notes":  "New look: Loonie coin logo, light and dark themes, quick actions on the dashboard and a smoother setup tour. Blueprint Marketplace with per-blueprint data consent, run history and Blueprint Studio. Create your account on first launch and connect AI, Jev and Google Drive from Settings - no config files.",
-    "pub_date":  "2026-09-28T01:36:40Z",
+    "version":  "0.3.0",
+    "notes":  "Multiple accounts, account chooser and Loonie Cloud sync",
+    "pub_date":  "2026-09-29T01:43:03Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkwxZGJqNWIySmFTL3UyNUdSUWZ1U1F6ZFpRMUJKMU9ybjlHVGZQMVlzdWYyci9XMjlIMExoRHhKeGNCOEtGakRuQkZWdlRHYzFaMlcyc0h5N21RY1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNTU5NDAwCWZpbGU6TG9vbmllXzAuMi4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjIuMAovWmVTM0UwSUxyZ1kvYU15NzYybWFpZDdhNWtUdUpKNjIwN0RMajVvVTZpV2ZhQnNqVGIxOXZ6YThOM2FOaEZsUjlJV0w4azhBWEV0L3NlempMVnhCUT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.2.0_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkd2a29TSzloS1E3Szh6N1ZLMEpCMjFFYkxhdDhBSTkvUDVCVzRiQ0lPZmRwWkovQlFVeUJSQWhQMy82MVBqVFU0R2ZPY2Jjc2hYOFV0aGd5cHdaVlFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjQ2MTgyCWZpbGU6TG9vbmllXzAuMy4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMApZa3htTm42a2htblF1SUNVVGV6c1drakNWWDBscjc2MWFmTjVsd05ZcWR2S0srY1paMUhMZmtqRmx4L1BSMXF3YUZ1cnUwN1gvNEVjb01tbWprbUVBQT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.3.0_x64-setup.exe"
                                          }
                   }
 }

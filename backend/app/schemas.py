@@ -53,6 +53,8 @@ class UserSettingsIn(BaseModel):
 
 class SetupStatusOut(BaseModel):
     needs_setup: bool
+    account_count: int = 0
+    allow_registration: bool = True
 
 
 class SetupRequest(BaseModel):

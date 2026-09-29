@@ -6,6 +6,7 @@ Never overwrites an existing config.yaml — upgrades must preserve user setting
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import shutil
 from functools import lru_cache
@@ -19,7 +20,24 @@ CONFIG_DIR = REPO_ROOT / "config"
 CONFIG_PATH = CONFIG_DIR / "config.yaml"
 CONFIG_EXAMPLE_PATH = CONFIG_DIR / "config.example.yaml"
 BACKEND_DIR = Path(__file__).resolve().parents[1]
-APP_SETTINGS_PATH = BACKEND_DIR / "data" / "app_settings.json"
+DATA_DIR = BACKEND_DIR / "data"
+APP_SETTINGS_PATH = DATA_DIR / "app_settings.json"
+REGISTRY_PATH = DATA_DIR / "registry.db"
+USERS_DIR = DATA_DIR / "users"
+
+_USER_ID_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+
+
+def user_dir(user_id: str) -> Path:
+    """Each account keeps its own database, statements and integration tokens in one folder, so a
+    single user's data can be backed up, synced or removed without touching anyone else's."""
+    if not _USER_ID_RE.match(user_id):
+        raise ValueError("Invalid user id")
+    return USERS_DIR / user_id
+
+
+def user_db_path(user_id: str) -> Path:
+    return user_dir(user_id) / "lifeos.db"
 
 # Only these sections/keys can ever be changed from the UI — everything else (auth secrets,
 # database path, CORS) stays file-only so the Settings screen can't break the install.
@@ -27,6 +45,7 @@ EDITABLE_SETTINGS: dict[str, set[str]] = {
     "ai": {"enabled", "endpoint", "model", "style", "response_field", "temperature", "max_tokens"},
     "jev": {"enabled", "api_key", "model", "base_url"},
     "google_drive": {"enabled", "client_id", "client_secret"},
+    "cloud": {"base_url"},
 }
 
 
@@ -124,3 +143,8 @@ def get_google_drive_config() -> dict[str, Any]:
 def get_marketplace_config() -> dict[str, Any]:
     cfg = load_config()
     return cfg.get("marketplace", {})
+
+
+def get_cloud_config() -> dict[str, Any]:
+    cfg = load_config()
+    return cfg.get("cloud", {})
