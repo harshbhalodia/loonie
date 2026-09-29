@@ -1,14 +1,15 @@
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-sqlalchemy==2.0.36
-alembic==1.14.0
-pydantic==2.10.4
-pydantic-settings==2.7.0
-email-validator==2.2.0
-python-jose[cryptography]==3.3.0
-bcrypt==4.2.1
-httpx==0.28.1
-python-multipart==0.0.20
-PyYAML==6.0.2
+fastapi>=0.115.6,<1
+uvicorn[standard]>=0.34,<1
+sqlalchemy>=2.0.36,<2.1
+alembic>=1.14,<2
+pydantic>=2.12,<3
+pydantic-settings>=2.7,<3
+email-validator>=2.2,<3
+python-jose[cryptography]>=3.3,<4
+# bcrypt 5 rejects passwords over 72 bytes instead of truncating them.
+bcrypt>=4.2,<5
+httpx>=0.28,<1
+python-multipart>=0.0.20,<1
+PyYAML>=6.0.2,<7
 pypdf==5.9.0
 json-repair==0.35.0
