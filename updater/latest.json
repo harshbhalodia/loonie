@@ -1,11 +1,11 @@
 {
-    "version":  "0.3.2",
-    "notes":  "Fix first-launch engine setup: works with newer Python versions, retries failed installs, and shows what went wrong",
-    "pub_date":  "2026-09-29T02:53:10Z",
+    "version":  "0.3.3",
+    "notes":  "No default account is created any more; the app refuses to attach to another copy of the engine; Google sign-in without setup steps",
+    "pub_date":  "2026-09-29T03:10:20Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTk5CaGcrWll0SVBzWHkvYXYxcEF5cDRBUkprTXhBakJpejE1aDk2R0h2ZFEzajlaMUpEZVdKQnU1TjA4elMveGxnYmtyd3lQRG4yY2l2dXdmdWZpdHdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjUwMzkwCWZpbGU6TG9vbmllXzAuMy4yX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMgpWQ3JVR0V5WUI5SUlQS09EMldEaHAxMG5XY2ViRmdzdExVVHJoOC9LNzRNRW1Bem9Pc3JQeFM4WlM0Sm0waWJWVW8yaVRlWGY2QkZUWk5sRVpqcm5DUT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.3.2_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkZxVTl3NTlJU3pUa216VGdpQlNnRmlkMGZFcGExV3hIZ1BlSW5WZXRxd0IrUDZBRk4rTlZMcWRSYXJCbEl0cVZPWnk0eWxSZXZ2VjZwRitRRkI0QWdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjUxNDIwCWZpbGU6TG9vbmllXzAuMy4zX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMwpIRHloZE9jblhmMmRodm96Z2dNU1NoQjNaNklpNUx0Tk8vWTR0SS94QjN4d2ZuOGFoa3F1dld5OVFnckR4Nm1UNnZEL05ZTzYxTi9GbVgrK2RMTmxCQT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.3.3_x64-setup.exe"
                                          }
                   }
 }

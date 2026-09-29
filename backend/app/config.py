@@ -6,6 +6,7 @@ Never overwrites an existing config.yaml — upgrades must preserve user setting
 from __future__ import annotations
 
 import json
+import os
 import re
 import secrets
 import shutil
@@ -135,9 +136,32 @@ def get_jev_config() -> dict[str, Any]:
     return cfg.get("jev", {})
 
 
+def get_custom_google_drive_config() -> dict[str, Any]:
+    """Only what the user typed in themselves (advanced override), never the built-in client."""
+    return load_config().get("google_drive", {})
+
+
+def _builtin_google_client() -> dict[str, str]:
+    """The OAuth client shipped with the app, so users only pick their Google account. Desktop-app
+    client secrets are not confidential (Google's own guidance), so embedding one is expected."""
+    client_id = os.environ.get("LOONIE_GOOGLE_CLIENT_ID", "").strip()
+    client_secret = os.environ.get("LOONIE_GOOGLE_CLIENT_SECRET", "").strip()
+    if not (client_id and client_secret):
+        try:
+            data = json.loads((Path(__file__).with_name("google_oauth_client.json")).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            data = {}
+        client_id, client_secret = str(data.get("client_id", "")).strip(), str(data.get("client_secret", "")).strip()
+    return {"client_id": client_id, "client_secret": client_secret} if client_id and client_secret else {}
+
+
 def get_google_drive_config() -> dict[str, Any]:
-    cfg = load_config()
-    return cfg.get("google_drive", {})
+    cfg = dict(get_custom_google_drive_config())
+    if not (cfg.get("client_id") and cfg.get("client_secret")):
+        cfg.update(_builtin_google_client())
+    if cfg.get("client_id") and cfg.get("client_secret"):
+        cfg["enabled"] = True  # nothing to switch on: it only does anything once the user signs in
+    return cfg
 
 
 def get_marketplace_config() -> dict[str, Any]:

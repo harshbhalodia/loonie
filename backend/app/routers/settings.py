@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 
-from app.config import get_ai_config, get_google_drive_config, get_jev_config, save_app_settings
+from app.config import get_ai_config, get_custom_google_drive_config, get_jev_config, save_app_settings
 from app.deps import get_current_user
 from app.models import User
 from app.schemas import (
@@ -45,7 +45,7 @@ def _jev_out() -> JevSettingsOut:
 
 
 def _google_drive_out() -> GoogleDriveSettingsOut:
-    cfg = get_google_drive_config()
+    cfg = get_custom_google_drive_config()
     return GoogleDriveSettingsOut(
         enabled=bool(cfg.get("enabled", False)),
         client_id=cfg.get("client_id") or "",

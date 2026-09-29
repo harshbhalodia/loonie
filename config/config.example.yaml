@@ -22,10 +22,6 @@ auth:
   access_token_expire_minutes: 43200 # 30 days
   # Lets anyone using this install create their own account (each gets a separate data folder).
   allow_registration: true
-  # Optional headless bootstrap. Leave both empty (the default) and Loonie asks you to create your
-  # account on first launch instead.
-  initial_admin_email: ""
-  initial_admin_password: ""
 
 # AI is entirely optional — every core feature works without it.
 ai:
@@ -59,20 +55,15 @@ jev:
 cloud:
   base_url: ""
 
-# Google Drive backup — optional, off by default. Backs up the local database + statement PDFs
+# Google Drive backup — optional. Backs up the local database + statement PDFs
 # to a "Loonie Backups" folder in your own Google Drive, so a hardware failure doesn't mean
 # losing your data. Uses the narrow `drive.file` scope — Google only lets this app see files it
 # created itself, never the rest of your Drive.
 #
-# Setup (one-time, ~5 min):
-#   1. Go to https://console.cloud.google.com/ and create a new project (or reuse one).
-#   2. Enable the "Google Drive API" for that project (APIs & Services -> Library).
-#   3. APIs & Services -> OAuth consent screen: choose "External", fill the required fields,
-#      then add your own Google account under "Test users" (keeps it in testing mode — no
-#      Google review needed for personal use).
-#   4. APIs & Services -> Credentials -> Create Credentials -> OAuth client ID -> Application
-#      type "Desktop app". Copy the generated Client ID and Client Secret below.
-#   5. Set enabled: true, restart Loonie, then connect from Settings -> Google Drive backup.
+# Users just click "Sign in with Google" in Settings. The app ships with the maintainer's own OAuth
+# client (backend/app/google_oauth_client.json, or the LOONIE_GOOGLE_CLIENT_ID /
+# LOONIE_GOOGLE_CLIENT_SECRET environment variables at build time). The client_id / client_secret
+# below are only an advanced override for people who want to use their own Google Cloud client.
 google_drive:
   enabled: false
   client_id: ""

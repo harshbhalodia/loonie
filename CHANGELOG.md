@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.3.3 -- 2026-09-29
+
+- No default account is created any more; the app refuses to attach to another copy of the engine; Google sign-in without setup steps
+
 ## 0.3.2 -- 2026-09-29
 
 - Fix first-launch engine setup: works with newer Python versions, retries failed installs, and shows what went wrong

@@ -4,9 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import get_auth_config, get_cors_origins
+from app.config import DATA_DIR, get_cors_origins
 from app.database import get_user_engine
-from app.registry import Account, RegistrySession, account_count
+from app.registry import Account, RegistrySession
 from app.routers import (
     accounts,
     agents,
@@ -34,7 +34,6 @@ from app.routers import (
     topics,
     watchlist,
 )
-from app.services import accounts as account_service
 from app.services import cloud_sync
 from app.services.drive_restore import apply_pending_restore_if_any
 from app.services.job_queue import start_worker
@@ -55,19 +54,6 @@ def _configure_logging() -> None:
     logger.propagate = False
 
 
-def _bootstrap_admin() -> None:
-    """Optional headless bootstrap: creates the first account from config on an empty install."""
-    with RegistrySession() as registry:
-        if account_count(registry) > 0:
-            return
-        cfg = get_auth_config()
-        email = cfg.get("initial_admin_email")
-        password = cfg.get("initial_admin_password")
-        if not email or not password:
-            return
-        account_service.create_account(registry, email, password)
-
-
 def _open_all_accounts() -> None:
     """Migrates every account's database at startup so the first sign-in is instant."""
     with RegistrySession() as registry:
@@ -85,7 +71,6 @@ async def lifespan(app: FastAPI):
     log.info("Loonie backend starting")
     apply_pending_restore_if_any()
     migrate_legacy_database_if_needed()
-    _bootstrap_admin()
     _open_all_accounts()
     start_worker()
     cloud_sync.start_worker()
@@ -135,4 +120,5 @@ app.include_router(cloud.router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    # data_dir lets the desktop shell confirm the engine on port 8000 is its own, not another copy.
+    return {"status": "ok", "data_dir": str(DATA_DIR)}

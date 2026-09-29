@@ -32,7 +32,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
 
-from app.config import get_google_drive_config, user_db_path, user_dir
+from app.config import get_custom_google_drive_config, get_google_drive_config, user_db_path, user_dir
 
 log = logging.getLogger("loonie.drive")
 
@@ -97,6 +97,7 @@ def get_status(user_id: str) -> dict:
         oauth_status, error = state["status"], state["error"]
     return {
         "configured": bool(cfg.get("client_id") and cfg.get("client_secret")),
+        "custom_client": bool(get_custom_google_drive_config().get("client_id")),
         "connected": is_connected(user_id),
         "connecting": oauth_status == "connecting",
         "error": error,
@@ -123,7 +124,7 @@ class _CallbackHandler(BaseHTTPRequestHandler):
 def start_connect(user_id: str) -> None:
     cfg = get_google_drive_config()
     if not cfg.get("client_id") or not cfg.get("client_secret"):
-        raise GoogleDriveError("Add your Google OAuth client ID and secret under Settings → Google Drive backup first.")
+        raise GoogleDriveError("Google Drive backup isn't set up in this version of Loonie yet.")
 
     with _oauth_lock:
         if _oauth_state.get(user_id, {}).get("status") == "connecting":
@@ -280,7 +281,7 @@ def _build_backup_zip(user_id: str) -> Path:
 def create_backup(user_id: str) -> dict:
     cfg = get_google_drive_config()
     if not cfg.get("enabled", False):
-        raise GoogleDriveError("Google Drive backup is turned off. Enable it under Settings → Google Drive backup.")
+        raise GoogleDriveError("Google Drive backup isn't available right now.")
 
     access_token = _get_access_token(user_id)
     folder_id = _ensure_backup_folder(access_token)
