@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 EntryType = Literal["income", "expense"]
 RecurrenceInterval = Literal["weekly", "biweekly", "monthly", "yearly"] | None
@@ -25,6 +25,13 @@ TopicStatus = Literal["exploring", "researching", "decided", "parked"]
 
 class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+
+def _clean_currency(value: str) -> str:
+    code = (value or "").strip().upper()
+    if len(code) != 3 or not code.isalpha():
+        raise ValueError("Currency must be a 3-letter code such as USD, CAD or EUR")
+    return code
 
 
 # ---------------- auth ----------------
@@ -136,6 +143,8 @@ class AccountIn(BaseModel):
     is_liquid: bool = True
     balance_source: BalanceSource = "manual"
 
+    _check_currency = field_validator("currency")(_clean_currency)
+
 
 class AccountOut(ORMModel):
     id: str
@@ -157,17 +166,21 @@ class AssetIn(BaseModel):
     id: str | None = None
     name: str
     asset_type: AssetType
+    currency: str = "USD"
     purchase_value: float = Field(ge=0)
     purchase_date: date | None = None
     current_value: float = Field(ge=0)
     current_value_updated_at: date | None = None
     notes: str | None = None
 
+    _check_currency = field_validator("currency")(_clean_currency)
+
 
 class AssetOut(ORMModel):
     id: str
     name: str
     asset_type: str
+    currency: str
     purchase_value: float
     purchase_date: date | None
     current_value: float
@@ -677,6 +690,77 @@ class AnalyticsSummary(BaseModel):
     income_forecast: IncomeForecastSummary
     diversification: DiversificationSummary
     goal_feasibility: list[GoalFeasibility]
+    # Every amount above is in `base_currency`; the per-currency split below is in native units.
+    base_currency: str = "USD"
+    net_worth_by_currency: list["CurrencyBreakdownItem"] = []
+    fx: "FxStatus | None" = None
+
+
+# ---------------- currency ----------------
+
+
+class CurrencyBreakdownItem(BaseModel):
+    currency: str
+    name: str
+    native_total: float
+    rate_to_base: float | None
+    base_total: float | None
+    percent: float
+    rate_source: str | None
+    account_count: int
+    asset_count: int
+
+
+class FxStatus(BaseModel):
+    base_currency: str
+    last_synced_at: datetime | None
+    missing_rates: list[str]
+    stale: bool
+    last_error: str | None
+
+
+class FxRateOut(BaseModel):
+    currency: str
+    name: str
+    rate_to_base: float
+    source: str
+    as_of: datetime | None
+    updated_at: datetime
+    in_use: bool
+
+
+class CurrencyOverview(BaseModel):
+    status: FxStatus
+    rates: list[FxRateOut]
+    breakdown: list[CurrencyBreakdownItem]
+    net_worth_base: float
+
+
+class CurrencyOption(BaseModel):
+    code: str
+    name: str
+
+
+class BaseCurrencyIn(BaseModel):
+    base_currency: str
+    relabel_existing: bool = False
+
+    _check_currency = field_validator("base_currency")(_clean_currency)
+
+
+class ManualRateIn(BaseModel):
+    rate_to_base: float = Field(gt=0)
+
+
+class SyncResultOut(BaseModel):
+    updated: list[str]
+    skipped_manual: list[str]
+    unavailable: list[str]
+    provider: str | None
+    overview: CurrencyOverview
+
+
+AnalyticsSummary.model_rebuild()
 
 
 # ---------------- agents ----------------
@@ -812,6 +896,7 @@ class BlueprintRunResult(BaseModel):
     status: Literal["ok", "error"]
     result: str | None = None
     error: str | None = None
+    run_id: str | None = None
 
 
 class DemoLicenseOut(BaseModel):
@@ -986,3 +1071,83 @@ class BudgetPeriodStatus(BaseModel):
 class BudgetHistorySummary(BaseModel):
     granularity: BudgetHistoryGranularity
     periods: list[BudgetPeriodStatus]
+
+
+# ---------------- pilot (chat) ----------------
+
+
+class PilotMessageIn(BaseModel):
+    role: Literal["user", "assistant"]
+    text: str = Field(min_length=1, max_length=20000)
+    payload: dict | None = None
+
+
+class PilotMessageOut(BaseModel):
+    id: str
+    role: str
+    text: str
+    payload: dict | None
+    created_at: datetime
+
+
+class PilotSearchHit(BaseModel):
+    message: PilotMessageOut
+    reply: PilotMessageOut | None
+
+
+class PilotAskIn(BaseModel):
+    question: str = Field(min_length=1, max_length=4000)
+
+
+class PilotAskOut(BaseModel):
+    answer: str
+
+
+class StatementAccountCandidate(BaseModel):
+    id: str
+    name: str
+    score: int
+
+
+class StatementIdentifyOut(BaseModel):
+    file_name: str
+    file_type: str
+    kind: str
+    kind_label: str
+    currency: str | None
+    last4: list[str]
+    matched_account_id: str | None
+    confidence: str
+    candidates: list[StatementAccountCandidate]
+    reasons: list[str]
+
+
+# ---------------- pilot advisors (packs delivered by LocalAgents Studio) ----------------
+
+
+class PilotAdvisorOut(BaseModel):
+    id: str
+    name: str
+    publisher: str
+    version: str
+    kind: str
+    summary: str
+    examples: list[str]
+    triggers: list[str]
+    scenario_count: int
+    requested: list[DataScopeOut]
+    granted: list[str]
+    consent_needed: bool
+    source: str
+    tier: str
+
+
+class PilotAdvisorsOut(BaseModel):
+    advisors: list[PilotAdvisorOut]
+    folder: str
+    problems: list[str]
+
+
+class PilotAdvisorRunIn(BaseModel):
+    # True = the user just agreed (in the chat) to share the data categories the advisor lists.
+    allow: bool = False

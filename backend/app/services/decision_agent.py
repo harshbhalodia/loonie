@@ -15,7 +15,7 @@ from json_repair import repair_json
 from sqlalchemy.orm import Session
 
 from app.models import User, WealthAccount, WealthAsset, WealthCategory, WealthCategoryGroup, WealthEntry, WealthGoal
-from app.services import ai_provider, jev_client
+from app.services import ai_provider, fx, jev_client
 from app.services.analytics import (
     compute_cashflow_series,
     compute_goal_feasibility,
@@ -78,11 +78,13 @@ def build_profile_snapshot(db: Session, user: User) -> dict:
     categories = db.query(WealthCategory).filter(WealthCategory.user_id == user.id).all()
     groups = db.query(WealthCategoryGroup).filter(WealthCategoryGroup.user_id == user.id).all()
     goals = db.query(WealthGoal).filter(WealthGoal.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     cashflow = compute_cashflow_series(entries, months_back=6)
     avg_monthly_net = round(sum(c["net"] for c in cashflow) / len(cashflow), 2) if cashflow else 0.0
 
     return {
+        "base_currency": fx.get_base_currency(db, user.id),
         "net_worth": compute_net_worth(accounts, assets),
         "liquidity": compute_liquidity(accounts, entries, categories, groups),
         "avg_monthly_net_cashflow_last_6_months": avg_monthly_net,

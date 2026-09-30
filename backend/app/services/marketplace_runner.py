@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from sqlalchemy.orm import Session
 
 from app.models import User, WealthAccount, WealthAsset, WealthCategory, WealthCategoryGroup, WealthEntry, WealthGoal
-from app.services import ai_provider, wealth_scopes
+from app.services import ai_provider, fx, wealth_scopes
 from app.services.analytics import (
     compute_cashflow_series,
     compute_diversification,
@@ -46,6 +46,7 @@ def _gather_snapshot(db: Session, user: User) -> dict:
     categories = db.query(WealthCategory).filter(WealthCategory.user_id == user.id).all()
     groups = db.query(WealthCategoryGroup).filter(WealthCategoryGroup.user_id == user.id).all()
     goals = db.query(WealthGoal).filter(WealthGoal.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     cashflow = compute_cashflow_series(entries, months_back=6)
     avg_monthly_net = sum(c["net"] for c in cashflow) / len(cashflow) if cashflow else 0.0

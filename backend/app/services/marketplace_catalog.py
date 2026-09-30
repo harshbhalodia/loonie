@@ -1,22 +1,45 @@
-"""Blueprint catalog: bundled declarative YAML definitions read from app/marketplace_catalog/.
+"""Advisor packs: the declarative YAML definitions that give Loonie its stress-tests, plans and
+decision aids.
 
-Deliberately data (YAML), not executable Python: installing a third-party blueprint in Loonie
-never means running someone else's code in this app — every blueprint is just a manifest plus a
-list of scenario descriptions, executed through the same trusted prompt/runner logic
-(services/marketplace_runner.py) for every publisher. This is a stricter, safer subset of the
-standalone `localagents` package's code-based blueprints (see the sibling `localagents` repo's
-docs/architecture/blueprint-marketplace.md), chosen specifically for the in-app marketplace
-where blueprints may come from parties Loonie itself hasn't reviewed.
+Packs are built, tested and maintained in LocalAgents Studio and simply *delivered* here; the
+person using Loonie never browses or installs anything — Pilot matches their words to a pack and
+asks for data consent in plain language. Two places are read:
+
+* `app/marketplace_catalog/`      — packs that ship inside Loonie (source "bundled")
+* `<data dir>/advisors/`          — packs Studio drops in or syncs (source "studio")
+
+A pack is data, never code: a manifest plus scenario descriptions, all executed by the same
+trusted runner (services/marketplace_runner.py) whoever published it. Manifest fields:
+
+  id, name, publisher, version            identity (a higher version replaces a lower one)
+  kind        stress_test | decision | analysis | plan   (how Pilot presents it)
+  summary     one plain sentence shown to the user
+  triggers    phrases that make Pilot choose this pack ("job loss", "what if rates rise")
+  examples    ready-made questions offered as suggestions
+  inputs      data scopes it asks to read (see services/wealth_scopes.py)
+  scenarios   [{id, description}] run one at a time, then combined into one advisory
+  specialist_system_prompt / lead_system_prompt / disclaimer   optional prompt overrides
+  tier, price_usd, category, tags         listing metadata
+
+Invalid packs are skipped and reported by `load_problems()` so Studio can show why.
 """
 from __future__ import annotations
 
+import logging
+import re
 from dataclasses import dataclass, field
-from functools import lru_cache
 from pathlib import Path
 
 import yaml
 
+from app.config import DATA_DIR
+
+log = logging.getLogger(__name__)
+
 CATALOG_DIR = Path(__file__).resolve().parents[1] / "marketplace_catalog"
+ADVISORS_DIR = DATA_DIR / "advisors"
+
+KINDS = ("stress_test", "decision", "analysis", "plan")
 
 DEFAULT_SPECIALIST_PROMPT = (
     "You are a stress-test specialist. You only ever reason from the verified figures you are "
@@ -61,37 +84,100 @@ class BlueprintDefinition:
     specialist_system_prompt: str = DEFAULT_SPECIALIST_PROMPT
     lead_system_prompt: str = DEFAULT_LEAD_PROMPT
     disclaimer: str = DEFAULT_DISCLAIMER
+    kind: str = "stress_test"
+    triggers: list[str] = field(default_factory=list)
+    examples: list[str] = field(default_factory=list)
+    source: str = "bundled"  # bundled | studio
 
 
-def _parse(raw: dict) -> BlueprintDefinition:
-    scenarios = [BlueprintScenario(id=s["id"], description=s["description"]) for s in raw.get("scenarios", [])]
+def _strings(value: object) -> list[str]:
+    return [str(v).strip() for v in value if str(v).strip()] if isinstance(value, list) else []
+
+
+def _parse(raw: dict, source: str) -> BlueprintDefinition:
+    for key in ("id", "name", "publisher"):
+        if not str(raw.get(key) or "").strip():
+            raise ValueError(f"missing '{key}'")
+    scenarios = [
+        BlueprintScenario(id=str(s["id"]), description=str(s["description"]))
+        for s in raw.get("scenarios") or []
+        if isinstance(s, dict) and s.get("id") and s.get("description")
+    ]
+    if not scenarios:
+        raise ValueError("needs at least one scenario with an id and description")
+    kind = str(raw.get("kind") or "stress_test")
+    if kind not in KINDS:
+        raise ValueError(f"kind must be one of {', '.join(KINDS)}")
     return BlueprintDefinition(
-        id=raw["id"],
-        name=raw["name"],
-        publisher=raw["publisher"],
+        id=str(raw["id"]).strip(),
+        name=str(raw["name"]).strip(),
+        publisher=str(raw["publisher"]).strip(),
         version=str(raw.get("version", "0.1.0")),
-        tier=raw.get("tier", "free"),
+        tier=raw.get("tier", "free") if raw.get("tier") in ("free", "paid") else "free",
         price_usd=raw.get("price_usd"),
-        category=raw.get("category", "general"),
-        summary=raw.get("summary", ""),
-        inputs=raw.get("inputs") or [],
-        tags=raw.get("tags") or [],
+        category=raw.get("category", kind),
+        summary=str(raw.get("summary", "")).strip(),
+        inputs=_strings(raw.get("inputs")),
+        tags=_strings(raw.get("tags")),
         scenarios=scenarios,
         specialist_system_prompt=raw.get("specialist_system_prompt") or DEFAULT_SPECIALIST_PROMPT,
         lead_system_prompt=raw.get("lead_system_prompt") or DEFAULT_LEAD_PROMPT,
         disclaimer=raw.get("disclaimer") or DEFAULT_DISCLAIMER,
+        kind=kind,
+        triggers=[t.lower() for t in _strings(raw.get("triggers"))],
+        examples=_strings(raw.get("examples")),
+        source=source,
     )
 
 
-@lru_cache
+def _version_key(version: str) -> tuple:
+    return tuple(int(p) if p.isdigit() else 0 for p in re.split(r"[.\-+]", version)[:4])
+
+
+_cache: dict[str, object] = {"signature": None, "packs": [], "problems": []}
+
+
+def _files() -> list[tuple[Path, str]]:
+    found: list[tuple[Path, str]] = []
+    for directory, source in ((CATALOG_DIR, "bundled"), (ADVISORS_DIR, "studio")):
+        if directory.exists():
+            found.extend((p, source) for p in sorted([*directory.glob("*.yaml"), *directory.glob("*.yml")]))
+    return found
+
+
+def _refresh() -> None:
+    files = _files()
+    signature = tuple((str(p), p.stat().st_mtime_ns, p.stat().st_size) for p, _ in files)
+    if signature == _cache["signature"]:
+        return
+
+    best: dict[str, BlueprintDefinition] = {}
+    problems: list[str] = []
+    for path, source in files:
+        try:
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            if not isinstance(raw, dict):
+                raise ValueError("the file is not a YAML mapping")
+            pack = _parse(raw, source)
+        except (OSError, yaml.YAMLError, ValueError, KeyError, TypeError) as exc:
+            problems.append(f"{path.name}: {exc}")
+            log.warning("skipping advisor pack %s: %s", path, exc)
+            continue
+        current = best.get(pack.id)
+        if current is None or _version_key(pack.version) >= _version_key(current.version):
+            best[pack.id] = pack
+
+    _cache.update(signature=signature, packs=sorted(best.values(), key=lambda p: p.name), problems=problems)
+
+
 def load_catalog() -> list[BlueprintDefinition]:
-    if not CATALOG_DIR.exists():
-        return []
-    definitions = []
-    for path in sorted(CATALOG_DIR.glob("*.yaml")):
-        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        definitions.append(_parse(raw))
-    return definitions
+    _refresh()
+    return list(_cache["packs"])  # type: ignore[arg-type]
+
+
+def load_problems() -> list[str]:
+    _refresh()
+    return list(_cache["problems"])  # type: ignore[arg-type]
 
 
 def get_blueprint(blueprint_id: str) -> BlueprintDefinition:

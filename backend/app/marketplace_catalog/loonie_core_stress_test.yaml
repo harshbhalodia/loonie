@@ -28,3 +28,18 @@ scenarios:
   - id: market_correction_20pct
     description: >
       Investment/retirement account balances fall 20% and take 18 months to recover.
+kind: stress_test
+triggers:
+  - stress test
+  - job loss
+  - lose my job
+  - rates rise
+  - interest rates
+  - market crash
+  - market correction
+  - how resilient
+  - worst case
+examples:
+  - Run a stress test
+  - What if I lose my job for 3 months?
+  - What happens if interest rates rise 2 points?

@@ -226,7 +226,7 @@ def run(blueprint_id: str, user: User = Depends(get_current_user), db: Session =
         run_log.shared_scopes_json = json.dumps(outcome.shared_scopes)
         db.add(run_log)
         db.commit()
-        return BlueprintRunResult(blueprint_id=blueprint_id, status="ok", result=outcome.result)
+        return BlueprintRunResult(blueprint_id=blueprint_id, status="ok", result=outcome.result, run_id=run_log.id)
     except marketplace_runner.ConsentRequiredError as exc:
         # Defense in depth: the pre-check above should already have caught this. Not logged as a
         # run since no data was gathered/sent — the request is rejected outright either way.
@@ -238,7 +238,7 @@ def run(blueprint_id: str, user: User = Depends(get_current_user), db: Session =
         run_log.error = str(exc)
         db.add(run_log)
         db.commit()
-        return BlueprintRunResult(blueprint_id=blueprint_id, status="error", error=str(exc))
+        return BlueprintRunResult(blueprint_id=blueprint_id, status="error", error=str(exc), run_id=run_log.id)
 
 
 @router.get("/history", response_model=list[BlueprintRunOut])

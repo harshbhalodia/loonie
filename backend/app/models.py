@@ -140,6 +140,7 @@ class WealthAsset(Base):
     user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     asset_type: Mapped[str] = mapped_column(String, nullable=False)
+    currency: Mapped[str] = mapped_column(String, default="USD", server_default="USD")
     purchase_value: Mapped[float] = mapped_column(Float, nullable=False)
     purchase_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     current_value: Mapped[float] = mapped_column(Float, nullable=False)
@@ -149,6 +150,43 @@ class WealthAsset(Base):
     sold_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class WealthCurrencySettings(Base):
+    """One row per user: the base (reporting) currency every net-worth figure is expressed in.
+
+    The row id is fixed so devices syncing through Loonie Cloud converge on a single row.
+    """
+
+    __tablename__ = "wealth_currency_settings"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default="currency-settings")
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True)
+    base_currency: Mapped[str] = mapped_column(String, default="USD", server_default="USD")
+    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class WealthFxRate(Base):
+    """How many units of the base currency one unit of `currency` is worth.
+
+    `source` is "live" (fetched from the rate provider on sync) or "manual" (typed by the user;
+    never overwritten by a sync until the user reverts it to live). Row id is `fx-<CODE>` so it is
+    identical on every synced device.
+    """
+
+    __tablename__ = "wealth_fx_rates"
+    __table_args__ = (UniqueConstraint("user_id", "currency", name="uq_fx_rate_user_currency"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    currency: Mapped[str] = mapped_column(String, nullable=False)
+    rate_to_base: Mapped[float] = mapped_column(Float, nullable=False)
+    source: Mapped[str] = mapped_column(String, default="live")
+    as_of: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 class WealthGoal(Base):
@@ -581,3 +619,16 @@ class DecisionAutoSession(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
+class PilotMessage(Base):
+    """One turn of the Pilot chat (a user prompt or Loonie's reply), kept forever so the
+    conversation is endless and searchable. `payload_json` holds the rich reply (steps, cards, links)."""
+
+    __tablename__ = "pilot_messages"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    role: Mapped[str] = mapped_column(String, nullable=False)  # user | assistant
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    payload_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)

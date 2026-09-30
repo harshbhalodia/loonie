@@ -51,3 +51,11 @@ scenarios:
     description: Annual inflation runs at 6% for 2 years, eroding fixed budgets.
   - id: income_growth_stall_2yr
     description: Income growth stalls at 0% for 2 years while expenses keep rising.
+kind: stress_test
+triggers:
+  - advisory stress test
+  - inflation spike
+  - income stall
+  - bank style review
+examples:
+  - Give me a full advisory-desk stress review

@@ -29,6 +29,7 @@ def upsert_asset(payload: AssetIn, user: User = Depends(get_current_user), db: S
     for field in (
         "name",
         "asset_type",
+        "currency",
         "purchase_value",
         "purchase_date",
         "current_value",

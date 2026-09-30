@@ -1,11 +1,11 @@
 {
-    "version":  "0.3.3",
-    "notes":  "No default account is created any more; the app refuses to attach to another copy of the engine; Google sign-in without setup steps",
-    "pub_date":  "2026-09-29T03:10:20Z",
+    "version":  "0.4.0",
+    "notes":  "Meet Pilot: one searchable chat for quick entries, PDF statements, questions about your data and decisions. Multi-currency net worth with live exchange rates. Advisor packs that Pilot brings in with your consent, publishable from LocalAgents. Simpler navigation.",
+    "pub_date":  "2026-09-30T02:38:24Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkZxVTl3NTlJU3pUa216VGdpQlNnRmlkMGZFcGExV3hIZ1BlSW5WZXRxd0IrUDZBRk4rTlZMcWRSYXJCbEl0cVZPWnk0eWxSZXZ2VjZwRitRRkI0QWdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNjUxNDIwCWZpbGU6TG9vbmllXzAuMy4zX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjMuMwpIRHloZE9jblhmMmRodm96Z2dNU1NoQjNaNklpNUx0Tk8vWTR0SS94QjN4d2ZuOGFoa3F1dld5OVFnckR4Nm1UNnZEL05ZTzYxTi9GbVgrK2RMTmxCQT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.3.3_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkRBdWpHaUw5L3NjMVlZandUZk9qVHJ4RWM5TFRncWxxSW9GUEc1ekE2eEttRVdZZUk5N2t3NVZLYmV1aURBclZ1ODVKYzNGL0drQW1LRzVRNFlHQVFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNzM1OTAzCWZpbGU6TG9vbmllXzAuNC4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjQuMApzUGVPT2dsVmdCbEo5cVlBb1ZueVVzZ0RqUjlaOVVXcWVuL0RqYzdZOWd4UHRmSGZUcUl2ajR3NEhGeXhNM1RIM1BpQVNvdUFPVkZJTENZdGdCRUZCUT09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.4.0_x64-setup.exe"
                                          }
                   }
 }

@@ -14,7 +14,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.models import User, WealthAccount, WealthAsset, WealthBudget, WealthCategory, WealthCategoryGroup, WealthEntry, WealthForecastAssumption, WealthGoal, WealthScenario, WealthTopic, WealthWatchlistItem
-from app.services import ai_provider
+from app.services import ai_provider, fx
 from app.services.analytics import (
     compute_asset_performance,
     compute_budget_statuses,
@@ -118,13 +118,15 @@ SYSTEM_PROMPT = """You are a personal finance assistant inside Loonie.
 You are given ONLY pre-computed, trusted numeric facts as JSON — never invent, estimate, \
 or recompute a number that is not present in the facts. Distinguish clearly between facts \
 (given), and your interpretation/recommendation (your own words). Be concise: 3-5 sentences, \
-plain language, no markdown headers. If nothing needs attention, say so briefly."""
+plain language, no markdown headers. If nothing needs attention, say so briefly. All money amounts are \
+in the currency named by base_currency (the user's default currency)."""
 
 
 def _gather_budget_facts(db: Session, user: User) -> dict:
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
     budgets = db.query(WealthBudget).filter(WealthBudget.user_id == user.id).all()
     categories = db.query(WealthCategory).filter(WealthCategory.user_id == user.id).all()
+    _, _, entries = fx.to_base(db, user.id, entries=entries)
     statuses = compute_budget_statuses(budgets, entries, categories, user.fiscal_year_start_month)
     return {"month": date.today().isoformat()[:7], "budgets": statuses}
 
@@ -134,6 +136,7 @@ def _gather_financial_insight_facts(db: Session, user: User) -> dict:
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
     categories = db.query(WealthCategory).filter(WealthCategory.user_id == user.id).all()
     groups = db.query(WealthCategoryGroup).filter(WealthCategoryGroup.user_id == user.id).all()
+    accounts, _, entries = fx.to_base(db, user.id, accounts, entries=entries)
 
     return {
         "net_worth": compute_net_worth(accounts),
@@ -144,6 +147,7 @@ def _gather_financial_insight_facts(db: Session, user: User) -> dict:
 
 def _gather_asset_facts(db: Session, user: User) -> dict:
     assets = db.query(WealthAsset).filter(WealthAsset.user_id == user.id).all()
+    _, assets, _ = fx.to_base(db, user.id, assets=assets)
     return {"assets": compute_asset_performance(assets)}
 
 
@@ -153,6 +157,7 @@ def _gather_risk_hedging_facts(db: Session, user: User) -> dict:
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
     categories = db.query(WealthCategory).filter(WealthCategory.user_id == user.id).all()
     groups = db.query(WealthCategoryGroup).filter(WealthCategoryGroup.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     return {
         "net_worth": compute_net_worth(accounts, assets),
@@ -165,6 +170,7 @@ def _gather_risk_hedging_facts(db: Session, user: User) -> dict:
 def _gather_diversification_facts(db: Session, user: User) -> dict:
     accounts = db.query(WealthAccount).filter(WealthAccount.user_id == user.id).all()
     assets = db.query(WealthAsset).filter(WealthAsset.user_id == user.id).all()
+    accounts, assets, _ = fx.to_base(db, user.id, accounts, assets)
     return {
         "net_worth": compute_net_worth(accounts, assets),
         "diversification": compute_diversification(accounts, assets),
@@ -175,6 +181,7 @@ def _gather_investment_planner_facts(db: Session, user: User) -> dict:
     accounts = db.query(WealthAccount).filter(WealthAccount.user_id == user.id).all()
     assets = db.query(WealthAsset).filter(WealthAsset.user_id == user.id).all()
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     cashflow = compute_cashflow_series(entries, months_back=6)
     facts: dict = {
@@ -203,6 +210,7 @@ def _gather_investment_planner_facts(db: Session, user: User) -> dict:
 def _gather_goal_planner_facts(db: Session, user: User) -> dict:
     goals = db.query(WealthGoal).filter(WealthGoal.user_id == user.id).all()
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
+    _, _, entries = fx.to_base(db, user.id, entries=entries)
     cashflow = compute_cashflow_series(entries, months_back=3)
     avg_monthly_net = sum(c["net"] for c in cashflow) / len(cashflow) if cashflow else 0.0
 
@@ -217,6 +225,7 @@ def _gather_scenario_strategist_facts(db: Session, user: User) -> dict:
     accounts = db.query(WealthAccount).filter(WealthAccount.user_id == user.id).all()
     assets = db.query(WealthAsset).filter(WealthAsset.user_id == user.id).all()
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     cashflow = compute_cashflow_series(entries, months_back=3)
     avg_monthly_net = sum(c["net"] for c in cashflow) / len(cashflow) if cashflow else 0.0
@@ -248,6 +257,7 @@ def _gather_research_advisor_facts(db: Session, user: User) -> dict:
     goals = db.query(WealthGoal).filter(WealthGoal.user_id == user.id).all()
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
     watchlist = db.query(WealthWatchlistItem).filter(WealthWatchlistItem.user_id == user.id).all()
+    _, _, entries = fx.to_base(db, user.id, entries=entries)
     topics = db.query(WealthTopic).filter(WealthTopic.user_id == user.id).all()
 
     cashflow = compute_cashflow_series(entries, months_back=3)
@@ -285,6 +295,12 @@ def _gather_research_advisor_facts(db: Session, user: User) -> dict:
 
 
 def gather_facts(agent_id: str, db: Session, user: User) -> dict:
+    facts = _gather_facts(agent_id, db, user)
+    facts["base_currency"] = fx.get_base_currency(db, user.id)
+    return facts
+
+
+def _gather_facts(agent_id: str, db: Session, user: User) -> dict:
     if agent_id == "wealth.budget_analyzer":
         return _gather_budget_facts(db, user)
     if agent_id == "wealth.financial_insight_agent":

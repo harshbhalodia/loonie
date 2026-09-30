@@ -21,12 +21,14 @@ from app.routers import (
     category_groups,
     category_rules,
     cloud,
+    currency,
     decisions,
     entries,
     goals,
     jobs,
     keyword_candidates,
     marketplace,
+    pilot,
     reminders,
     scenarios,
     settings,
@@ -93,6 +95,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(accounts.router)
 app.include_router(assets.router)
+app.include_router(currency.router)
+app.include_router(pilot.router)
 app.include_router(categories.router)
 app.include_router(category_groups.router)
 app.include_router(category_rules.router)

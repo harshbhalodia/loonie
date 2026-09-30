@@ -5,6 +5,7 @@ from app.database import get_db
 from app.deps import get_current_user
 from app.models import User, WealthAccount, WealthAsset, WealthBudget, WealthCategory, WealthCategoryGroup, WealthEntry, WealthForecastAssumption, WealthGoal
 from app.schemas import AnalyticsSummary, NetWorthProjectionPoint
+from app.services import fx
 from app.services.analytics import (
     compute_asset_performance,
     compute_budget_statuses,
@@ -35,11 +36,16 @@ def _load(db: Session, user_id: str):
 @router.get("/summary", response_model=AnalyticsSummary)
 def analytics_summary(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     accounts, categories, groups, entries, budgets, assets, goals = _load(db, user.id)
+    raw_accounts, raw_assets = accounts, assets
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     recent_cashflow = compute_cashflow_series(entries, months_back=3)
     avg_monthly_net = sum(c["net"] for c in recent_cashflow) / len(recent_cashflow) if recent_cashflow else 0.0
 
     return AnalyticsSummary(
+        base_currency=fx.get_base_currency(db, user.id),
+        net_worth_by_currency=fx.net_worth_by_currency(db, user.id, raw_accounts, raw_assets),
+        fx=fx.status(db, user.id),
         net_worth=compute_net_worth(accounts, assets),
         liquidity=compute_liquidity(accounts, entries, categories, groups),
         cashflow=compute_cashflow_series(entries, months_back=12),
@@ -61,6 +67,7 @@ def analytics_projection(
     accounts = db.query(WealthAccount).filter(WealthAccount.user_id == user.id).all()
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
     assets = db.query(WealthAsset).filter(WealthAsset.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     if assumption_id:
         assumption = db.get(WealthForecastAssumption, assumption_id)

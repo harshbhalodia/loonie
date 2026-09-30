@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.4.0 -- 2026-09-30
+
+- Meet Pilot: one searchable chat for quick entries, PDF statements, questions about your data and decisions. Multi-currency net worth with live exchange rates. Advisor packs that Pilot brings in with your consent, publishable from LocalAgents. Simpler navigation.
+
 ## 0.3.3 -- 2026-09-29
 
 - No default account is created any more; the app refuses to attach to another copy of the engine; Google sign-in without setup steps

@@ -14,6 +14,7 @@ from app.models import (
     WealthScenarioIncomeSource,
 )
 from app.schemas import ScenarioIn, ScenarioOut, ScenarioProjectionPoint
+from app.services import fx
 from app.services.analytics import compute_cashflow_series, project_scenario
 
 router = APIRouter(prefix="/wealth/scenarios", tags=["wealth:scenarios"])
@@ -103,6 +104,7 @@ def scenario_projection(scenario_id: str, user: User = Depends(get_current_user)
     accounts = db.query(WealthAccount).filter(WealthAccount.user_id == user.id).all()
     assets = db.query(WealthAsset).filter(WealthAsset.user_id == user.id).all()
     entries = db.query(WealthEntry).filter(WealthEntry.user_id == user.id).all()
+    accounts, assets, entries = fx.to_base(db, user.id, accounts, assets, entries)
 
     cashflow = compute_cashflow_series(entries, months_back=3)
     avg_monthly_net = sum(c["net"] for c in cashflow) / len(cashflow) if cashflow else 0.0
