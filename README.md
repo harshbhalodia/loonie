@@ -11,17 +11,10 @@ machine unless you choose to connect an optional service.
 
 ## Install
 
-**Option 1 — Windows installer (recommended)**
-
 1. Install [Python 3.11+](https://python.org/downloads/) if you don't have it (tick **Add to PATH**).
 2. Download the latest installer from [`installer/`](installer/) (or from [loonie.ai](https://loonie.ai#download)) and run it.
-3. Launch **Loonie** from the Start menu.
-
-**Option 2 — one line in PowerShell** (installs Python for you if it's missing):
-
-```powershell
-irm https://raw.githubusercontent.com/harshbhalodia/loonie/main/install.ps1 | iex
-```
+   Use the `.exe` for a normal install, or the `.msi` if you deploy with Windows tools.
+3. Launch **Loonie** from the Start menu. It opens full screen and keeps the taskbar visible.
 
 ## First launch
 
@@ -48,6 +41,9 @@ OpenAI-compatible server), enter the model name, and click **Save & test connect
 - **Wealth:** accounts & net worth, monthly/yearly budgets with history, goals with on-track
   verdicts, CSV/PDF statement import with keyword rules, reminders, credit-card statements,
   scenario sandbox, watchlist & research topics.
+- **Guru:** your guide across every part of your life. Ask in plain words, drop a statement, or
+  run a stress test with the right advisor. Guru asks for your agreement before first use, works
+  on several requests at once, and lets you pin answers you want to keep.
 - **Insights:** budget, risk, diversification, goal, investment and research advisor agents —
   they explain numbers Loonie already computed, never invent them.
 - **Blueprint Marketplace:** free and premium stress-test blueprints (rate shock, job loss,
