@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.6.1 -- 2026-09-30
+
+- Asset metadata is now free-form: add as many key and value pairs as you like to any asset, with one-tap suggestions per asset type. Faster first start: new installs build their database directly instead of replaying the upgrade history.
+
 ## 0.6.0 -- 2026-09-30
 
 - Richer asset records: add address, location, type, use and tags to homes, vehicles and other assets so advisors understand them better. Accounts can now be marked as available any time or available with constraints (GIC, term deposit, corporate), and the overview shows cash available now separately from cash with constraints. Add credit limits to credit cards and lines of credit to see credit available. New Risk covered summary showing how many months of essentials your cash and credit could cover.
