@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.6.0 -- 2026-09-30
+
+- Richer asset records: add address, location, type, use and tags to homes, vehicles and other assets so advisors understand them better. Accounts can now be marked as available any time or available with constraints (GIC, term deposit, corporate), and the overview shows cash available now separately from cash with constraints. Add credit limits to credit cards and lines of credit to see credit available. New Risk covered summary showing how many months of essentials your cash and credit could cover.
+
 ## 0.5.0 -- 2026-09-30
 
 - Start without an account: Loonie opens a default profile you can secure later by signing up, and your data moves with it. New guided setup that explains what Loonie is for, adds several accounts at once and adapts to whether you use AI. Guru now answers open-ended questions with your AI instead of forcing them into built-in answers, and says how each reply was produced. Eleven new advisors: emergency fund, debt payoff, mortgage, major purchase, retirement, goal funding, investment drawdown, income reduction, net worth, financial independence and job loss. Clearer Guru logo.

@@ -1,11 +1,11 @@
 {
-    "version":  "0.5.0",
-    "notes":  "Start without an account: Loonie opens a default profile you can secure later by signing up, and your data moves with it. New guided setup that explains what Loonie is for, adds several accounts at once and adapts to whether you use AI. Guru now answers open-ended questions with your AI instead of forcing them into built-in answers, and says how each reply was produced. Eleven new advisors: emergency fund, debt payoff, mortgage, major purchase, retirement, goal funding, investment drawdown, income reduction, net worth, financial independence and job loss. Clearer Guru logo.",
-    "pub_date":  "2026-09-30T21:28:24Z",
+    "version":  "0.6.0",
+    "notes":  "Richer asset records: add address, location, type, use and tags to homes, vehicles and other assets so advisors understand them better. Accounts can now be marked as available any time or available with constraints (GIC, term deposit, corporate), and the overview shows cash available now separately from cash with constraints. Add credit limits to credit cards and lines of credit to see credit available. New Risk covered summary showing how many months of essentials your cash and credit could cover.",
+    "pub_date":  "2026-09-30T21:46:42Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkdpYTNJMVdnLzU0aEl0aTBoZGtsYzRCRTlqLytCY09tUmZCUk9pVVlsVXZLbHNZRDRUemYxUTRNSTkxb1lVKzhRN2d3TXhicklxSXhjZmVVdmVPZkFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwODAzNzA0CWZpbGU6TG9vbmllXzAuNS4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjUuMApEVk9tUFRmUlRlTk5Gd1ltZTRFN2JjM1FzQktXbVhlQmU4TzREbHdMUzMzOXprLzJxQ1EwL1VRcmxXMnFycnNGQjdGM29FYjBPVWxrMXZIblRFS1BDZz09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.5.0_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkdrL2dScFF1aHRxU3NPai82TFpuWXRSQWI1N0F2T2JNMDBaZlluMS9yS1BHY25oQ2liaDJYWEMxV0RsK2tIKzZVaXVGWGI3U1FwWkVpQURnZVZYQ3djPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwODA0ODAyCWZpbGU6TG9vbmllXzAuNi4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjYuMApXQVJvRktDdVlaRlZTZE83Ymwzc0RqRzR2VjNQN29YQnNEcmNXMC9jbERuNXUzYStlZVlWK2ZkN004R0RzQldZbWdSRUJqTlVjV0d3QXU0b1pOTmpBdz09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.6.0_x64-setup.exe"
                                          }
                   }
 }
