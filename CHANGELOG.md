@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.6.3 -- 2026-10-02
+
+- Removed Health; added privacy-filtered Sentry diagnostics and improved engine restart on updates or reinstalls.
+
 ## 0.6.1 -- 2026-09-30
 
 - Asset metadata is now free-form: add as many key and value pairs as you like to any asset, with one-tap suggestions per asset type. Faster first start: new installs build their database directly instead of replaying the upgrade history.

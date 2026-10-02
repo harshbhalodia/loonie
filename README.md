@@ -4,8 +4,9 @@
 
 Loonie is a private, local-first "Life OS" desktop app for Windows — track accounts, budgets,
 goals and net worth, import bank statements, stress-test your finances with marketplace
-blueprints, and get advice from AI that runs on your own computer. Your data never leaves your
-machine unless you choose to connect an optional service.
+blueprints, and get advice from AI that runs on your own computer. Your financial data stays on
+your machine unless you choose to connect an optional service. Installed builds send privacy-filtered
+diagnostics to Sentry by default; reporting can be disabled in Settings.
 
 **Website:** [loonie.ai](https://loonie.ai)
 
@@ -69,6 +70,10 @@ pill in the header — click it, then **Update & restart now**. You can also che
 - Marketplace blueprints only receive the data categories you explicitly grant, enforced by the
   engine itself. Publishers never receive your data.
 - AI features are opt-in; secrets you enter in Settings are never displayed back.
+- Privacy-filtered backend errors and sampled feature usage are sent to Sentry in the United States
+  by default. Financial records, statements, AI conversations, credentials and account identities
+  are excluded from reports. Sentry receives connection metadata during delivery. Disable reporting
+  under **Settings > Anonymous diagnostics**; this applies to all accounts on the installation.
 - Each install generates its own random signing key.
 
 ## Requirements
