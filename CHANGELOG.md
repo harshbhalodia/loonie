@@ -2,6 +2,10 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.6.4 -- 2026-10-02
+
+- Built-in Qwen3-VL 4B AI with verified first-use download, offline inference, read-only Guru tools, scanned PDF parsing, and optional LM Studio.
+
 ## 0.6.3 -- 2026-10-02
 
 - Removed Health; added privacy-filtered Sentry diagnostics and improved engine restart on updates or reinstalls.

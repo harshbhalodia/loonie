@@ -1,11 +1,11 @@
 {
-    "version":  "0.6.3",
-    "notes":  "Removed Health; added privacy-filtered Sentry diagnostics and improved engine restart on updates or reinstalls.",
-    "pub_date":  "2026-10-02T03:38:22Z",
+    "version":  "0.6.4",
+    "notes":  "Built-in Qwen3-VL 4B AI with verified first-use download, offline inference, read-only Guru tools, scanned PDF parsing, and optional LM Studio.",
+    "pub_date":  "2026-10-02T20:42:49Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkZNK1NNWjhFODNGVXVYS2FaamFKNmd4dFlLSjFzMk5FN3Q1N0MxRVNJUXRuMUl1cm44Y1AvVGxucDBpUmtqMHd4ME5HRVJyNHhTVFUzMGxKZ3FvVUFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwOTEyMzAxCWZpbGU6TG9vbmllXzAuNi4zX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjYuMwovcUdJQzN1N3RRVDdRa3NmWXJhV0ZsNzN3eTZQQkFWM1crckJXTHgvWVNRK2w1bXI5M21GVTF2RzRjbHhQdmdlcitiTkpnVEFJM0xydlJ5dHNMTytBQT09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.6.3_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkdIclpoT1VpTzhvbE1VOXRTcnhjUnJ4dWtlU281NjhHOXdXcHpxQzB1M1VQOXZBZ2hYRjJKbVo4VmU1VVh5OHlPRW85NHF0cGhVZzY5bWFYNllFVFFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwOTczNzY4CWZpbGU6TG9vbmllXzAuNi40X3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjYuNAp3UjlYdHJMT0h3aE16YWpSWWRkTHpMWXE4d1AwaWNsaUVtSGY3VDFlQy9waEpBYTdmY3lwb011QW96MDhvdjkyS0lYeFFKZERjYndqaGhCZm5pVEJDdz09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.6.4_x64-setup.exe"
                                          }
                   }
 }

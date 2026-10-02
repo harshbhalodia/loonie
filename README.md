@@ -30,9 +30,18 @@ No config files to edit — everything is set up inside the app.
 
 ## Connecting AI (optional)
 
-Every calculation in Loonie works without AI. To unlock advisor agents, marketplace stress tests
-and PDF statement import, go to **Settings → AI model**, pick **LM Studio** or **Ollama** (or any
-OpenAI-compatible server), enter the model name, and click **Save & test connection**.
+Every calculation in Loonie works without AI. **Built-in AI** is the default in version 0.6.4.
+The installer includes its runtime; first use downloads and verifies the Qwen3-VL 4B model and
+vision encoder (3.33 GB from Hugging Face, with no financial data sent). Allow 4 GB of free disk
+space. View progress, cancel, or retry under **Settings > AI model**. Once downloaded, built-in
+inference works offline. CPU speed varies; model memory is unloaded after two idle minutes.
+
+Guru can retrieve computed financial facts through read-only tools. Statement extraction works
+page by page, including scanned PDFs. Always review the extracted rows before applying them.
+
+To use a different model, select **LM Studio**, **Ollama**, or a custom server in Settings,
+enter its model name, and save. This stops the built-in runtime. Existing explicitly saved
+external-provider preferences are preserved when upgrading.
 
 - **LM Studio:** Developer tab → Start server, then copy the model name.
 - **Ollama:** `ollama pull llama3.1` — it serves automatically.
@@ -69,7 +78,9 @@ pill in the header — click it, then **Update & restart now**. You can also che
   Loonie Cloud or Google Drive backup.
 - Marketplace blueprints only receive the data categories you explicitly grant, enforced by the
   engine itself. Publishers never receive your data.
-- AI features are opt-in; secrets you enter in Settings are never displayed back.
+- AI can be disabled in Settings; Guru requires acceptance of its terms before use. Built-in
+  inference stays on your computer. Model downloads contact Hugging Face and its delivery
+  providers, which receive connection metadata. Secrets entered in Settings are never displayed back.
 - Privacy-filtered backend errors and sampled feature usage are sent to Sentry in the United States
   by default. Financial records, statements, AI conversations, credentials and account identities
   are excluded from reports. Sentry receives connection metadata during delivery. Disable reporting
@@ -80,7 +91,9 @@ pill in the header — click it, then **Update & restart now**. You can also che
 
 - Windows 10/11 (macOS/Linux coming later)
 - Python 3.11+
-- Optional: LM Studio, Ollama or another local model server for AI features
+- Built-in AI: recommended 16 GB RAM, 4 GB free disk space, and internet for the initial model
+  download. Performance varies by CPU; complex documents may need a stronger external model.
+- Optional: LM Studio, Ollama or another model server instead of built-in AI
 
 ## Built with
 
