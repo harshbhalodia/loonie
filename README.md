@@ -24,17 +24,24 @@ diagnostics to Sentry by default; reporting can be disabled in Settings.
 2. **Create your account** — an email and password. Each account has its own separate workspace,
    so several people can share one PC. Next time, pick your account from the chooser (or sign in
    as a different user).
-3. A short guided tour helps you add a goal and an account, and optionally connect an AI model.
+3. Guru opens the guided setup in chat: it helps you choose your AI (built-in, your own, or just
+   the numbers), then gets to know you one quick question at a time.
 
 No config files to edit — everything is set up inside the app.
 
 ## Connecting AI (optional)
 
-Every calculation in Loonie works without AI. **Built-in AI** is the default in version 0.6.4.
-The installer includes its runtime; first use downloads and verifies the Qwen3-VL 4B model and
-vision encoder (3.33 GB from Hugging Face, with no financial data sent). Allow 4 GB of free disk
-space. View progress, cancel, or retry under **Settings > AI model**. Once downloaded, built-in
-inference works offline. CPU speed varies; model memory is unloaded after two idle minutes.
+Every calculation in Loonie works without AI. **Built-in AI** is the default in version 0.7.0.
+The installer includes its runtime; first use downloads and verifies Google's Gemma 4 E2B model
+and vision encoder (4.3 GB from Hugging Face, with no financial data sent). Allow 5 GB of free
+disk space. It runs with a 64K-token context and flash attention, and uses memory and processor
+only while Guru is answering (it unloads about 20 seconds after the last answer). View progress,
+cancel or retry, **Unload from memory** or **Delete model** under **Settings > AI model**. Once
+downloaded, built-in inference works offline. CPU speed varies.
+
+**Upgrading from 0.6.x:** your data, settings and the Qwen3-VL model you already downloaded keep
+working. Settings > AI model offers **Download Gemma 4** when you are ready; Qwen is removed
+automatically once Gemma is verified.
 
 Guru can retrieve computed financial facts through read-only tools. Statement extraction works
 page by page, including scanned PDFs. Always review the extracted rows before applying them.
@@ -51,9 +58,12 @@ external-provider preferences are preserved when upgrading.
 - **Wealth:** accounts & net worth, monthly/yearly budgets with history, goals with on-track
   verdicts, CSV/PDF statement import with keyword rules, reminders, credit-card statements,
   scenario sandbox, watchlist & research topics.
-- **Guru:** your guide across every part of your life. Ask in plain words, drop a statement, or
-  run a stress test with the right advisor. Guru asks for your agreement before first use, works
-  on several requests at once, and lets you pin answers you want to keep.
+- **Guru:** one assistant with two speeds. **Ask Guru** is for deep thinking: questions, advisors,
+  stress tests and decisions. **Quick setup** (Guru memory) is instant: it fills things in and keeps
+  what it knows in step with your real numbers. Every answer is tagged Quick or Deep and shows
+  what it used; Guru asks inline when it is missing a fact; and **What Guru knows about you** lets
+  you change or forget anything. Guru asks for your agreement before first use, works on several
+  requests at once, and lets you pin answers you want to keep.
 - **Insights:** budget, risk, diversification, goal, investment and research advisor agents —
   they explain numbers Loonie already computed, never invent them.
 - **Blueprint Marketplace:** free and premium stress-test blueprints (rate shock, job loss,
@@ -91,7 +101,7 @@ pill in the header — click it, then **Update & restart now**. You can also che
 
 - Windows 10/11 (macOS/Linux coming later)
 - Python 3.11+
-- Built-in AI: recommended 16 GB RAM, 4 GB free disk space, and internet for the initial model
+- Built-in AI: recommended 16 GB RAM, 5 GB free disk space, and internet for the initial model
   download. Performance varies by CPU; complex documents may need a stronger external model.
 - Optional: LM Studio, Ollama or another model server instead of built-in AI
 

@@ -2,6 +2,41 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.7.0 -- 2026-10-14
+
+**One Guru, two speeds, and a faster built-in AI.**
+
+### Guru is now one assistant
+
+- **Ask Guru and Quick setup live on one screen.** Ask Guru is for deep thinking: questions, advisors, stress tests and decisions. Quick setup (Guru memory) is instant: it fills things in, keeps your answers up to date and checks in on what changed. Both read the same memory.
+- **Quick or Deep, and what Guru used.** Every answer is tagged Quick or Deep, and shows which parts of your picture it drew on.
+- **Guru asks when it needs to know.** If a question depends on something Guru has never been told (for example your income before "can I afford a mortgage?"), the answer includes a small card to fill it in on the spot, then "Ask again with this".
+- **What Guru knows about you.** Open the panel from either side to see, change or forget any remembered answer, or forget everything Guru learned from talking with you. Your accounts, assets, goals and entries are never touched.
+
+### Onboarding starts with Guru
+
+- The first run now opens in Guru's chat. Guru asks how it should think: built-in AI, your own AI (LM Studio, Ollama), or just the numbers.
+- Choosing the built-in AI downloads and tests the model right in the chat, with progress, cancel and retry, then asks for the Guru terms before any AI reads your information.
+- Setup is finished with a clear Continue button, and the quick forms are one click away.
+
+### New built-in AI: Gemma 4 E2B
+
+- Google's Gemma 4 E2B is the new default built-in model, with a 64K-token context window and flash attention for faster, longer answers.
+- The model only uses memory and processor while Guru is answering. It unloads itself about 20 seconds after the last answer.
+- Settings > AI model now has **Unload from memory** and **Delete model** buttons.
+
+### Upgrading from 0.6.x
+
+- Nothing to do. Your data, accounts, settings and the Qwen3-VL model you already downloaded keep working exactly as before.
+- Settings > AI model offers **Download Gemma 4** when you are ready (about 4.3 GB). Qwen is removed automatically once Gemma is verified, giving back its 3.3 GB. Your current model keeps answering during the download.
+- Onboarding is not shown again if you have already set Loonie up.
+
+### Polish
+
+- Forms and dialogs (Add account, Add entry and more) now fit properly, with no cut-off fields or stray scrollbars.
+- The onboarding card adapts to your window size.
+- Guru memory is no longer a separate sidebar page; the old link still works.
+
 ## 0.6.4 -- 2026-10-02
 
 - Built-in Qwen3-VL 4B AI with verified first-use download, offline inference, read-only Guru tools, scanned PDF parsing, and optional LM Studio.

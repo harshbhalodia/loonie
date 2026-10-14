@@ -1,11 +1,11 @@
 {
-    "version":  "0.6.4",
-    "notes":  "Built-in Qwen3-VL 4B AI with verified first-use download, offline inference, read-only Guru tools, scanned PDF parsing, and optional LM Studio.",
-    "pub_date":  "2026-10-02T20:42:49Z",
+    "version":  "0.7.0",
+    "notes":  "One Guru, two speeds: Ask Guru and Quick setup now share one memory, with Quick/Deep answer tags, inline questions when Guru needs a fact, and controls to see or forget what it knows. Onboarding starts in Guru\u0027s chat and sets up your AI for you. New built-in Gemma 4 E2B model (64K context, flash attention) that only uses memory while answering, with Unload and Delete buttons. Your current model, data and settings carry over untouched.",
+    "pub_date":  "2026-10-14T03:11:42Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkdIclpoT1VpTzhvbE1VOXRTcnhjUnJ4dWtlU281NjhHOXdXcHpxQzB1M1VQOXZBZ2hYRjJKbVo4VmU1VVh5OHlPRW85NHF0cGhVZzY5bWFYNllFVFFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwOTczNzY4CWZpbGU6TG9vbmllXzAuNi40X3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjYuNAp3UjlYdHJMT0h3aE16YWpSWWRkTHpMWXE4d1AwaWNsaUVtSGY3VDFlQy9waEpBYTdmY3lwb011QW96MDhvdjkyS0lYeFFKZERjYndqaGhCZm5pVEJDdz09Cg==",
-                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.6.4_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcmtSUit2QlVYTkFUWElzWDBBQnJaczBFQzgwRmhGc1NIQ0dTUFBtemRvWW5mOG5KcTlxOUFDemxPZUJoSG9ncnVhdk1VVGRaMEY2NmZ0VUh2bEE0ajJaQkFoYnJLY1FvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkxOTQ3NTAyCWZpbGU6TG9vbmllXzAuNy4wX3g2NC1zZXR1cC5leGUJdmVyc2lvbjowLjcuMApBeVRwV2Y3NEsyZ2g1TkZUT2I5VWN1bkRaVlhrVXFkeUVQTEFWVGlsUXgrd0k4ZDNXdnlUVzIrRWFuK0I3akxvTnBIN0x4MlVaMjNsc1BHeHE4QjJBZz09Cg==",
+                                             "url":  "https://raw.githubusercontent.com/harshbhalodia/loonie/main/updater/Loonie_0.7.0_x64-setup.exe"
                                          }
                   }
 }
