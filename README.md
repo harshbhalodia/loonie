@@ -31,27 +31,36 @@ No config files to edit — everything is set up inside the app.
 
 ## Connecting AI (optional)
 
-Every calculation in Loonie works without AI. **Built-in AI** is the default in version 0.7.0.
-The installer includes its runtime; first use downloads and verifies Google's Gemma 4 E2B model
-and vision encoder (4.3 GB from Hugging Face, with no financial data sent). Allow 5 GB of free
-disk space. It runs with a 64K-token context and flash attention, and uses memory and processor
-only while Guru is answering (it unloads about 20 seconds after the last answer). View progress,
-cancel or retry, **Unload from memory** or **Delete model** under **Settings > AI model**. Once
-downloaded, built-in inference works offline. CPU speed varies.
+Every calculation in Loonie works without AI. **Loonie AI** (built-in) is the default from version 0.8.0:
+Loonie's own model, **Loonie Guru**, fine-tuned for exactly what Guru does — understanding requests,
+short grounded answers, advice from your numbers, research reviews and reading statements. The
+installer includes its runtime; first use downloads the model and its vision encoder (about 6 GB)
+from [Loonie's Hugging Face page](https://huggingface.co/harshbhalodia/loonie-guru-gguf), with no
+financial data sent. Allow 8 GB of free disk space. It uses memory and processor only while Guru is
+answering (it unloads about 20 seconds after the last answer). View progress, cancel or retry,
+**Unload from memory** or **Delete model** under **Settings > AI model**. Once downloaded, built-in
+inference works offline. CPU speed varies.
 
-**Upgrading from 0.6.x:** your data, settings and the Qwen3-VL model you already downloaded keep
-working. Settings > AI model offers **Download Gemma 4** when you are ready; Qwen is removed
-automatically once Gemma is verified.
+**Verified before it runs:** Loonie only ever installs files listed in a release signed with Loonie's
+key. It checks the signature, the exact version, and every file's size and checksum, and never goes
+back to an older version. Nothing else is downloaded as built-in AI.
+
+**Gets better over time:** Loonie checks for a new model version at start-up and every 12 hours and
+downloads it in the background (turn this off under **Settings > AI model**). The version you have
+keeps answering until the new one is verified; then Guru switches by itself. **Check for updates**
+looks right away.
+
+**Upgrading from 0.7.x:** your data and settings carry over. The stock Gemma 4 model used by 0.7 is
+removed to free its disk space, and Loonie downloads its own model once. LM Studio setups keep working.
 
 Guru can retrieve computed financial facts through read-only tools. Statement extraction works
 page by page, including scanned PDFs. Always review the extracted rows before applying them.
 
-To use a different model, select **LM Studio**, **Ollama**, or a custom server in Settings,
-enter its model name, and save. This stops the built-in runtime. Existing explicitly saved
-external-provider preferences are preserved when upgrading.
+To use a model you run yourself, select **LM Studio** in Settings (any OpenAI-compatible server
+address works), enter its model name, and save. This stops the built-in runtime. Existing saved
+server settings are preserved when upgrading.
 
 - **LM Studio:** Developer tab → Start server, then copy the model name.
-- **Ollama:** `ollama pull llama3.1` — it serves automatically.
 
 ## What's inside
 
@@ -101,9 +110,9 @@ pill in the header — click it, then **Update & restart now**. You can also che
 
 - Windows 10/11 (macOS/Linux coming later)
 - Python 3.11+
-- Built-in AI: recommended 16 GB RAM, 5 GB free disk space, and internet for the initial model
+- Built-in AI: recommended 16 GB RAM, 8 GB free disk space, and internet for the initial model
   download. Performance varies by CPU; complex documents may need a stronger external model.
-- Optional: LM Studio, Ollama or another model server instead of built-in AI
+- Optional: LM Studio (or another OpenAI-compatible server) instead of built-in AI
 
 ## Built with
 
