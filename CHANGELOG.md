@@ -2,6 +2,22 @@
 
 All notable changes to Loonie are documented here. Dates are in UTC.
 
+## 0.8.0 -- 2026-10-31
+
+### Loonie AI, Loonie's own model
+- Built-in AI now runs **Loonie Guru**, Loonie's own model, fine-tuned for Guru's work: understanding requests, short answers, advice, research reviews and reading statements.
+- **Trusted by design:** the model downloads only from Loonie's Hugging Face repo, and only after every file matches a release signed by Loonie (signature, exact version, size and checksum). Nothing else is ever downloaded as built-in AI, and an older version is never accepted.
+- **Always improving:** Loonie checks for a better model at start-up and every 12 hours and downloads it in the background (turn this off in Settings > AI model). The current model keeps answering until the new one is verified, then Guru switches by itself.
+- Settings > AI model shows the installed version, offers updates and has a *Check for updates* button.
+
+### Simpler AI choices
+- Two options: **Loonie AI** (built-in, private, offline) or **LM Studio** (any OpenAI-compatible server you run).
+- The stock Gemma 4 model from 0.7 is removed to free its disk space.
+
+### Guru
+- Choose Guru's answer style in Settings.
+- Internal evaluation and training tools moved out of the app.
+
 ## 0.7.0 -- 2026-10-14
 
 **One Guru, two speeds, and a faster built-in AI.**
